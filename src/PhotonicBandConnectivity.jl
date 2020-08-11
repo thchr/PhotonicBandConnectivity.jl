@@ -1,10 +1,12 @@
 module PhotonicBandConnectivity
 
-using Crystalline, LinearAlgebra 
-import Crystalline: rotation
+using Crystalline
+using SymmetryBases
+using LinearAlgebra
+using DocStringExtensions
 
-include(pkgdir(Crystalline)*"/src/SymmetryBases/SymmetryBases.jl")
-using .SymmetryBases
+using Crystalline: rotation
+
 
 export minimal_expansion_of_zero_freq_bands, sum_symbases, sum_symbases!,
     check_target_filling_regular1L, topology_from_2T1L_xor_1L
@@ -138,7 +140,7 @@ function find_minimum_bandreps_regular1L(sgnum, lgirs, timereversal, ms¹ᴸ, ms
     for νᵗ in 3:max_patience_νᵗ # target filling (≥3) (function returns from loop)
         verbose && print("   … νᵗ = ", νᵗ, ": ")
 
-        cⁱs, νᵀ = check_target_filling_regular1L(νᵗ, ms, νsᴴ, sb, idx¹ᴸ, Γidxs, notΓidxs;
+        cⁱs, νᵀ = check_target_filling_regular1L(νᵗ, ms¹ᴸ, ms, νsᴴ, sb, idx¹ᴸ, Γidxs, notΓidxs;
                                                  verbose=verbose)
 
         if !isempty(cⁱs)

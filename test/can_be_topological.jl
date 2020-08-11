@@ -1,13 +1,7 @@
 using Crystalline, LinearAlgebra, Test, JuMP, GLPK
 import Crystalline: rotation, rotation_order_3d
-if !isdefined(Main, :(PhotonicBandConnectivity))
-    includet("../src/PhotonicBandConnectivity.jl")
-    using Main.PhotonicBandConnectivity
-end
-if !isdefined(Main, :(SymmetryBases))
-    includet("../../SymmetryBases/SymmetryBases.jl")
-    using Main.SymmetryBases
-end
+using PhotonicBandConnectivity
+using SymmetryBases
 
 rotation_order(op::SymOperation{3}) = (W=rotation(op); rotation_order_3d(det(W), tr(W)))
 

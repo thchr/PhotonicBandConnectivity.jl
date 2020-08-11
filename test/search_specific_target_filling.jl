@@ -1,14 +1,9 @@
 using Crystalline
-if !isdefined(Main, :(PhotonicBandConnectivity))
-    includet("../src/PhotonicBandConnectivity.jl")
-    using Main.PhotonicBandConnectivity
-    const PBC = PhotonicBandConnectivity
-end
-if !isdefined(Main, :(SymmetryBases))
-    includet("../../SymmetryBases/SymmetryBases.jl")
-    using Main.SymmetryBases
-end
+using PhotonicBandConnectivity
+using SymmetryBases
 using PrettyTables
+
+const PBC = PhotonicBandConnectivity
 includet("utils.jl") # to get `convert_irreplabel2latex`
 
 #------------------------------------------------------------------------------------------
@@ -30,8 +25,9 @@ end
 timereversal = true
 verbose      = false
 latex        = false
-file         = "/mnt/c/Dropbox (MIT)/Web/thchr.github.io/_assets/connectivity_tables.md"
-io           = open(file, "w+")
+#file         = "/mnt/c/Dropbox (MIT)/Web/thchr.github.io/_assets/connectivity_tables.md"
+#io           = open(file, "w+")
+io           = stdout
 νᵗstart      = 3 # start target filling
 Nsolutions   = 2 # how many νᵀ solutions we want
 

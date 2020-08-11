@@ -1,11 +1,6 @@
-if !isdefined(Main, :(PhotonicBandConnectivity))
-    includet("../src/PhotonicBandConnectivity.jl")
-    using Main.PhotonicBandConnectivity
-end
-if !isdefined(Main, :(SymmetryBases))
-    includet("../../SymmetryBases/SymmetryBases.jl")
-    using Main.SymmetryBases
-end
+using PhotonicBandConnectivity
+using SymmetryBases
+
 
 using Test
 #= 
