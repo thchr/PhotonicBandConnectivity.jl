@@ -3,6 +3,16 @@ import Crystalline: rotation, rotation_order_3d
 using PhotonicBandConnectivity
 using SymmetryBases
 
+#=  
+    This file analyses the trivial/fragile/nontrivial topology of those spacegroups (68 in 
+    total) that have well-defined and regular Γ-irreps at ω=0, such that their symmetry 
+    vectors are regular as well. In that case, we can assess the topology of the symmetry
+    vectors simply by checking against the Hilbert bases, using `get_solution_topology`
+    from SymmetryBases.
+    For a more general approach, see examples/topology_from_xor.jl, which doesn't require
+    regular symmetry content at ω=0 (but cannot treat fragile topology).
+=#
+
 rotation_order(op::SymOperation{3}) = (W=rotation(op); rotation_order_3d(det(W), tr(W)))
 
 sgnums = collect(1:MAX_SGNUM[3])
@@ -14,10 +24,6 @@ end
 filter!(sgnums) do sgnum
     all(≥(0), PhotonicBandConnectivity.find_representation²ᵀ(sgnum, timereversal=true))
 end
-# of these (68) space groups, just 10 have nontrivial topological classification (all Z₂):
-#filter!(sgnums) do sgnum
-#    classification(bandreps(sgnum, timereversal=true))≠"Z₁"
-#end
 
 # determine if expansions of 2T must include any nontrivial Hilbert bases via symmetry bases
 nontopo_data = nontopological_bases.(sgnums, timereversal=true)
@@ -35,14 +41,14 @@ fragile_data = split_fragiletrivial_bases.(nontopo_sbs, Bs)
 trivial_idxs = getindex.(fragile_data, 1)
 fragile_idxs = getindex.(fragile_data, 2)
 
-# compute the actual symmetry vectors for each compatibility-constraint band solution
-nsᵀs = [unique!(sort(sum_symbases.(Ref(sb), cⁱs))) for (sb, cⁱs) in zip(sbs,  cⁱss)]
+# compute the unique symmetry vectors for each compatibility-constrained band solution
+nsᵀs = [unique!(sort(sum_symbases.(Ref(sb), cⁱs))) for (sb, cⁱs) in zip(sbs, cⁱss)]
 
 # ---------------------------------------------------------------------------------------- #
 
 # for each of the band-solution in `nsᵀs`, check whether or not it can be expanded solely 
 # using the nontopological basis (then it is a trivial band-combination!); if not, it must
-# be a nontrivial and topological band-combination
+# be a nontrivial band-combination
 println("\n-------------------\n")
 for (sgidx, sgnum) in enumerate(sgnums)
     print("SG ", sgnum, ", ν = ", νᵀs[sgidx])
@@ -65,7 +71,6 @@ for (sgidx, sgnum) in enumerate(sgnums)
         print("   ", topology_kind, " ⇐  ")
         Crystalline.prettyprint_symmetryvector(stdout, nᵀ, irreplabels(BRSs[sgidx]))
         println()
-        # TODO: Maybe store `topology_kind` in some vector for each space group?
     end
     println()
 end

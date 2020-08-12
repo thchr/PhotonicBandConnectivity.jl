@@ -14,6 +14,9 @@ using LinearAlgebra: qr
           of the symmetry vectors extracted by PhotonicBandConnectivity
 =#
 
+# -----------------------------------------------------------------------------------------
+# METHODS
+
 function is_compatible_kvec(kv::KVec, kv′::KVec, cntr::Char)
     # This method determines whether there is a solution to 
     #   kv + G = kv′(αβγ′)
@@ -115,7 +118,9 @@ function connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
     return cgraph
 end
 
-## test
+# -----------------------------------------------------------------------------------------
+# SCRIPTING
+
 sgnum = 230;
 sb = compatibility_bases(sgnum)[1];
 lgirsvec=realify.(get_lgirreps(sgnum));

@@ -42,9 +42,10 @@ function minimal_expansion_of_zero_freq_bands(sgnum::Integer;
         # If there are no non-mirror improper rotations, we can directly infer the irrep of
         # the 2T branches. If that irrep is regular (i.e. has no negative coefficients), we
         # don't need to invoke 1L at all, and can solve for just 2T alone.
-        return find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ; 
-                                               safetychecks=true, verbose=verbose)
-
+        r = find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ; 
+                                            safetychecks=true, verbose=verbose)
+        return r..., nothing
+        
     else 
         # Two possible scenarios (treat with same approach):
         #   - All symvals known & irregular 2T and regular 1L irreps
@@ -98,10 +99,10 @@ function find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ;
                                                 maxterms) # limit to two basis terms
 
         if !isempty(cⁱs)
-            verbose      && println("   ⇒ νᵀ = ", ν²ᵀᵗ, ": ", length(cⁱs), " solutions")            
+            verbose && println("   ⇒ νᵀ = ", ν²ᵀᵗ, ": ", length(cⁱs), " valid expansions")            
             safetychecks && safetycheck²ᵀ(cⁱs, ν²ᵀᵗ, ms²ᵀ, νsᴴ, sb, Γidxs)
             
-            return cⁱs, ν²ᵀᵗ, sb, nothing
+            return cⁱs, ν²ᵀᵗ, sb
         end
     end
     throw("Found no valid expansions consistent with constraints")
@@ -116,6 +117,7 @@ function find_minimum_bandreps_regular1L(sgnum, lgirs, timereversal, ms¹ᴸ, ms
     notΓidxs = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
     νsᴴ = fillings(sb)
     νᴴₘᵢₙ, νᴴₘₐₓ = extrema(νsᴴ)
+    verbose && println(" (νᴴₘᵢₙ = ", νᴴₘᵢₙ, ")")
     
     # Here, the irrep of 1L is regular (Γ₁) and the irrep of 2T is irregular (i.e. has 
     # negative coefficients). As a result, it is impossible to expand 2T's irrep in the
@@ -126,14 +128,13 @@ function find_minimum_bandreps_regular1L(sgnum, lgirs, timereversal, ms¹ᴸ, ms
     if shuffle_1Lpick 
         if length(ntidxs¹ᴸ) > pick¹ᴸ
             pick¹ᴸ += 1
-        else 
+        else
             @warn "Unable to shuffle 1L pick"
         end
     end
     idx¹ᴸ = ntidxs¹ᴸ[pick¹ᴸ] # I've tested that resulting expansions for 2T (=[1L+2T]-[1L]) are invariant wrt. to this choice
     νᴸ = νsᴴ[idx¹ᴸ]
-    
-    verbose && println(" (νᴴₘᵢₙ = ", νᴴₘᵢₙ, ")")
+        
     # find _all_ feasible solutions to ms constraints for fixed and minimal νᵗ; we use a 
     # recursive looping construct to find candidate expansions
     max_patience_νᵗ = max(4*νᴴₘₐₓ, 8)
@@ -144,7 +145,7 @@ function find_minimum_bandreps_regular1L(sgnum, lgirs, timereversal, ms¹ᴸ, ms
                                                  verbose=verbose)
 
         if !isempty(cⁱs)
-            verbose && println("   ⇒ νᵀ = ", νᵀ, ": ", length(cⁱs), " solutions")
+            verbose && println("   ⇒ νᵀ = ", νᵀ, ": ", length(cⁱs), " valid expansions")
             return cⁱs, νᵀ, sb, idx¹ᴸ
         end
     end

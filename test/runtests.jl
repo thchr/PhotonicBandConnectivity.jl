@@ -1,25 +1,24 @@
-if !isdefined(Main, :(PhotonicBandConnectivity))
-    include("../src/PhotonicBandConnectivity.jl")
-    using Main.PhotonicBandConnectivity
+using PhotonicBandConnectivity
+using Test
+
+@testset "Pinned irreps for 2T, 1L, and 2T+1L" begin 
+    for sgnum in 1:230
+        for timereversal in (true, false)
+            lgirs = PhotonicBandConnectivity.get_lgirreps_at_Γ(sgnum, Val(3))
+            timereversal && (lgirs = realify(lgirs))
+
+            # pinned irreps at (Γ,ω=0)
+            ms¹ᴸ = PhotonicBandConnectivity.find_representation¹ᴸ(lgirs)
+            ms²ᵀ = PhotonicBandConnectivity.find_representation²ᵀ(lgirs)
+            ms   = PhotonicBandConnectivity.find_representation²ᵀ⁺¹ᴸ(lgirs)
+            
+            @test all(≥(0), ms)             # check: 2T+1L irreps regular
+            @test all(≥(0), ms¹ᴸ)           # check: 1L irrep regular (Γ₁)
+            @test all(ms .== ms²ᵀ .+ ms¹ᴸ)  # check: [2T+1L] = [2T] + [1L]
+        end
+    end
 end
 
-Ms = getindex.(
-        minimal_expansion_of_zero_freq_bands.(1:230, timereversal=true, verbose=false),
-     2)
-
-# Compare with Watanabe & Lu
-Base.ndigits(::Nothing) = 1 # pirate haaaack
-include("scripts/watanabelu_results.jl") # loads Watanabe & Lu data (in `Msᵂᴸ`)
-Q = [[sg, M, Mbound] for (sg, M, Mbound) ∈ zip(1:230, Ms, getindex.(Msᵂᴸ, 2))]
-Q′ = filter(x-> x[2]!==nothing, Q) # filter out those sgs that are not currently implemented (i.e. allow only regular 2T)
-issues = map(x->x[2]===nothing ? "─" : (x[2]≥(x[3]) ? " " : "!"), Q)
-differences = map(x->x[2]===nothing ? "─" : (x[2]==(x[3]) ? " " : "≠"), Q)
-
-foreach(vcat.(Q, issues, differences)) do x
-    println("|", " "^(4-ndigits(x[1])), x[1], " |", " "^(3-ndigits(x[2])),  # SG no.
-    x[2] === nothing ? "─" : x[2], " | ",  # our M predictions
-    x[3] == 2 ? "=" : "≥", x[3], " | ",    # M-bounds from Watanabe & Lu
-    x[4], " | ",                           # bound violations
-    x[5], " |"                             # differences from bound?
-    )
-end
+# other tests
+include("check_pick1L_invariance.jl")
+include("regular2T_vs_regular1L_equivalence.jl")
