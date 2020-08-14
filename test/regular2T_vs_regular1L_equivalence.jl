@@ -26,7 +26,7 @@ rotation_order(op::SymOperation{3}) = (W=rotation(op); rotation_order_3d(det(W),
         end
         # restrict to sgs that have regular 2T representations
         filter!(sgnums) do sgnum
-            all(≥(0), PBC.find_representation²ᵀ(sgnum, timereversal=timereversal))
+            all(≥(0), find_representation²ᵀ(sgnum, timereversal=timereversal))
         end
 
         # ---------------------------------------------------------------------------------
