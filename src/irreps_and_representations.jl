@@ -1,26 +1,31 @@
+"""
+    $(SIGNATURES)
+
+Get the compatibility basis `sb` for `sgnum` with or without time-reversal symmetry
+(corresponding to `timereversal=true` or `false`, respectively), as well as the associated
+indexes into the Γ point irreps in `sb`, computed from the Γ-point irreps `lgirs`.
+"""
+
 function compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal)
     # Find the Hilbert basis that respects the compatibility relations
-    sb, _, BRS = compatibility_bases(sgnum, spinful=false, timereversal=timereversal)
-    nsᴴ = matrix(sb)
-    # Find the indices of the Γ irreps in `BRS::BandRepSet` (and hence in `nsᴴ`), and how  
-    # they map to the corresponding irrep indices in `lgirs`.
+    sb, _ = compatibility_bases(sgnum, spinful=false, timereversal=timereversal)
+    # Find the indices of the Γ irreps in `BRS::BandRepSet` and `sb::SymBasis` and how they
+    # map to the corresponding irrep indices in `lgirs`.
     # TODO: note that the irrep-sorting in sb and lgirs is not always the same (e.g. in ±
     #       irreps), so we are not guaranteed that Γidxs is a simple range (e.g., it could 
     #       be [1,3,5,2,4,6]). We really ought to align the irreps sorting in `get_lgirreps`
     #       versus `bandreps` (BRS) and `compatibility_bases` (sb).
-    irlabs_brs = irreplabels(BRS)
-    irlabs_lgirs = Crystalline.formatirreplabel.(label.(lgirs))
-    Γidxs = map(irlab->findfirst(==(irlab), irlabs_brs), irlabs_lgirs)
+    Γidxs = get_Γidxs(lgirs, sb)
 
     return sb, Γidxs
 end
 
-function get_lgirreps_at_Γ(sgnum::Integer, Dᵛ::Val=Val(3)) # small irreps at Γ
-   lgirs = first(get_lgirreps(sgnum,  Dᵛ))
-   kv = kvec(first(lgirs))
-   @assert all(iszero, kv.k₀) && isspecial(kv) # Make sure that lgirs indeed is sampled at Γ
+function get_Γidxs(lgirs::AbstractVector{<:LGIrrep}, sb_or_brs::Union{BandRepSet, SymBasis})
+    irlabs_sb_or_brs = irreplabels(sb_or_brs)
+    irlabs_lgirs = Crystalline.formatirreplabel.(label.(lgirs))
+    Γidxs = map(irlab->findfirst(==(irlab), irlabs_sb_or_brs), irlabs_lgirs)
 
-   return lgirs
+    return Γidxs
 end
 
 # irrep-expansions/representation at Γ for the transverse (2T), longitudinal (1L), and triad
@@ -55,7 +60,7 @@ for postfix in ("²ᵀ⁺¹ᴸ", "¹ᴸ", "²ᵀ")
 
     # convenience accessors via 
     @eval function $f(sgnum::Integer; timereversal::Bool=true)
-        lgirs = get_lgirreps_at_Γ(sgnum, Val(3))
+        lgirs = get_lgirreps(sgnum, Val(3))["Γ"]
         timereversal && (lgirs = realify(lgirs))
 
         return $f(lgirs)

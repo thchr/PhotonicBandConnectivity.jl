@@ -27,7 +27,7 @@ function minimal_expansion_of_zero_freq_bands(sgnum::Integer;
                                               shuffle_1Lpick::Bool=false)
 
     # Irreps at Γ, irrep-multiplicities of ω=0 2T bands, and symmetry operations
-    lgirs = get_lgirreps_at_Γ(sgnum, Val(3))
+    lgirs = get_lgirreps(sgnum, Val(3))["Γ"]
     timereversal && (lgirs = realify(lgirs))
     lg = group(first(lgirs))
     rotvals = map(op->(W=rotation(op); Crystalline.rotation_order_3d(det(W), tr(W))), lg)

@@ -2,7 +2,6 @@ using Crystalline
 import Crystalline: rotation, rotation_order_3d
 using PhotonicBandConnectivity
 using PhotonicBandConnectivity: 
-        get_lgirreps_at_Γ,
         find_representation¹ᴸ, find_representation²ᵀ,
         find_minimum_bandreps_regular2T, 
         find_minimum_bandreps_regular1L
@@ -33,7 +32,7 @@ rotation_order(op::SymOperation{3}) = (W=rotation(op); rotation_order_3d(det(W),
 
         for sgnum in sgnums
             # irreps at Γ and Hilbert basis
-            lgirs = get_lgirreps_at_Γ(sgnum, Val(3))
+            lgirs = get_lgirreps(sgnum, Val(3))["Γ"]
             timereversal && (lgirs = realify(lgirs))
             
             # pinned irreps at (Γ,ω=0)

@@ -1,10 +1,11 @@
+using Crystalline
 using PhotonicBandConnectivity
 using Test
 
 @testset "Pinned irreps for 2T, 1L, and 2T+1L" begin 
     for sgnum in 1:230
         for timereversal in (true, false)
-            lgirs = PhotonicBandConnectivity.get_lgirreps_at_Γ(sgnum, Val(3))
+            lgirs = get_lgirreps(sgnum, Val(3))["Γ"]
             timereversal && (lgirs = realify(lgirs))
 
             # pinned irreps at (Γ,ω=0)

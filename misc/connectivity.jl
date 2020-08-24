@@ -121,10 +121,14 @@ end
 # -----------------------------------------------------------------------------------------
 # SCRIPTING
 
+timereversal = true;
 sgnum = 230;
 sb = compatibility_bases(sgnum)[1];
-lgirsvec=realify.(get_lgirreps(sgnum));
+lgirsd = get_lgirreps(sgnum, Val(3));
+if timereversal
+    foreach((klab, lgirs)->(lgirsd[klab] = realify(lgirs)), zip(keys(lgirsd), values(lgirsd)))
+end
 kvsᴬ, klabsᴬ = sb.kvs, sb.klabs;
-kvsᴮ, klabsᴮ = kvec.(first.(lgirsvec)), klabel.(first.(lgirsvec));
+kvsᴮ, klabsᴮ = kvec.(first.(values(lgirsd))), klabel.(first.(values(lgirsd)));
 cntr = centering(sgnum);
 cg = connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr);
