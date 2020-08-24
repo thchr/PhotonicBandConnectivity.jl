@@ -1,7 +1,8 @@
 using PhotonicBandConnectivity
 using SymmetryBases
 using Test
-using SymmetryBases: matrix
+using Crystalline: matrix
+using Nemo
 
 #= 
 This is a test script to check the topology of the 2T solutions in the cases where the 2T 
@@ -10,7 +11,7 @@ contrast the topology of the 1L mode choice/pick with the topology of the 2T+1L 
 See src/topology_as_2T1L_vs_1L_difference.jl for additional details.
 =#
 
-sgnums = [1:46..., 48:122..., 124:230...] # 1:230
+sgnums = 1:230
 has_tr = false # true
 
 # ω=0 solutions
@@ -20,8 +21,8 @@ cⁱss   = getindex.(data, 1) # coefficients of expansions
 sbs    = getindex.(data, 3) # symmetry bases
 idx¹ᴸs = getindex.(data, 4) # index for chosen 1L branch
 
-# nontopological Hilbert bases
-nontopo_sbs = getindex.(nontopological_bases.(sgnums, timereversal=has_tr), 1)
+# Band representations (to check trivial vs. nontrivial topology)
+BRSs = bandreps.(sgnums, timereversal=has_tr)
 
 # check whether 1L pick is trivial
 for (sgidx, sgnum) in enumerate(sgnums)
@@ -29,12 +30,16 @@ for (sgidx, sgnum) in enumerate(sgnums)
     
     # TODO: Treat the simpler `idx¹ᴸ !== nothing` case as well within this script?
     if idx¹ᴸ !== nothing #&& classification(bandreps(sgnum, timereversal=has_tr)) ≠ "Z₁"
-        sb, nontopo_sb = sbs[sgidx], nontopo_sbs[sgidx]
-        nontopo_M = matrix(nontopo_sb)
+        sb, BRS = sbs[sgidx], BRSs[sgidx]
+        B  = matrix(BRS, true)
+        Bℤ = MatrixSpace(ZZ, size(B)...)(B)
         nᴸ = sb[idx¹ᴸ]
 
+        # ---------------------------------------------------------------------------------
         # check topology of all T+L solutions using `topology_from_2T1L_xor_1L` from
         # src/topology_as_2T1L_vs_1L_difference.jl (xor difference of T+L and L topology)
+
+        # find unique symmetry vectors
         ns = unique!(sort(sum_symbases.(Ref(sb), cⁱss[sgidx])))
 
         println("SG ", sgnum, ": νᵀ = ", νᵀs[sgidx], 
@@ -43,7 +48,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
         # find "Z₂" factor-type topology of each solution (this step can be a little slow 
         # for some of the SGs with many solutions/large M, because the optimization step 
         # is a bit slow)
-        topos = topology_from_2T1L_xor_1L.(ns, Ref(nᴸ), Ref(nontopo_M))
+        topos = topology_from_2T1L_xor_1L.(ns, Ref(nᴸ), Ref(Bℤ))
 
         # get aggregated stats 
         trivial_countᵀ    = count(==(trivial),    topos)

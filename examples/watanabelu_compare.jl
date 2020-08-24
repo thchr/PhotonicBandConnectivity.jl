@@ -4,7 +4,7 @@ includet((@__DIR__)*"/../misc/watanabelu_results.jl") # loads Watanabe & Lu data
 using Main.WatanabeLuResults
 
 sgnums = 1:230
-data   = minimal_expansion_of_zero_freq_bands.(sgnums, timereversal=true, verbose=false)
+data   = minimal_expansion_of_zero_freq_bands.(sgnums, timereversal=true, verbose=true)
 νᵀs    = getindex.(data, 2)
 
 # Compare with Watanabe & Lu

@@ -1,57 +1,73 @@
+using Nemo
 using Crystalline
+using Crystalline: matrix, smith, classification, prettyprint_symmetryvector
 using PhotonicBandConnectivity
 using SymmetryBases
 using PrettyTables
+using Test
 
 const PBC = PhotonicBandConnectivity
-includet("text_utils.jl") # to get `convert_irreplabel2latex`
+
+includet("text_utils.jl"); using Main.TextUtils
 
 #------------------------------------------------------------------------------------------
-# UTILITY FUNCTIONS
-
-function add_content_to_symvec_str_at_kidx(str::String, kidx::Integer, insert::String)
-
-    parts = replace.(split.(strip.(str, Ref(('[', ']'))), ", "), Ref(" "=>""))
-    Γslot = parts[kidx]
-    parts[kidx] = insert*(length(Γslot) > 0 ? '+'*Γslot : "")
-
-    return '['*join(parts, ", ")*']'
+# TABLE CONFIG
+function table_config(type::String)
+    if type == "latex"
+        return (backend = :latex, hlines= Int[], 
+                table_type = :longtable, 
+                longtable_footer = "\\emph{\\footnotesize\\ldots\\ continued on next page}")
+    elseif type == "unicode"
+        return (crop = :none, tf = unicode, vlines = :none, hlines = [:begin, 1, :end])
+    elseif type == "markdown"
+        return (crop = :none, tf = markdown)
+    end
 end
+
 
 #------------------------------------------------------------------------------------------
 # SETUP
 
-sgnums       = 1:230
-timereversal = true
+sgnums       = 1:230#1:230
+timereversal = false
 Nsolutions   = 2 # how many νᵀ solutions we want
 νᵗstart      = 3 # start target filling
-
-#file         = "/mnt/c/Dropbox (MIT)/Web/thchr.github.io/_assets/connectivity_tables.md"
-#io           = open(file, "w+")
-io           = stdout
+outputtype   = "latex"
+#tablename    = "connectivity_tables"*(timereversal ? "" : "_tr-broken")*".md"
+#filepath     = "/mnt/c/Dropbox (MIT)/Web/thchr.github.io/_assets/"*tablename
+tablename    = "connectivity-tr-"*(timereversal ? "invariant" : "broken")*".tex"
+filepath     = "/mnt/c/Dropbox (MIT)/Projects/photonic-topo-sym/band-connectivities/manuscript/tables/"*tablename
+io           = open(filepath, "w+")
+#io           = stdout
 verbose      = false
-latex        = false
+t₀           = time()
+
+repr²ᵀ = outputtype ∈ ("markdown", "unicode") ? "(▪)²ᵀ" : "(\\smallsquare)\\tT"
 
 for sgnum in sgnums
-    #t=@elapsed begin
+    println(io, outputtype=="latex" ? "\\subsubsection*{SG $sgnum}\n" : "## SG $(sgnum)\n")
+    io ≠ stdout && println("SG $(sgnum)")
 
     # -------------------------------------------------------------------------------------
     # PREP-WORK (IRREPS, HILBERT BASES, PINNED EIGENVALUES)
 
-    lgirs_Γ  = PBC.get_lgirreps_at_Γ(sgnum, Val(3)); # Γ-irreps
-    lgirsvec = get_lgirreps(sgnum, Val(3))
-    timereversal && (lgirs_Γ  = realify(lgirs_Γ))
-    timereversal && (lgirsvec = realify.(lgirsvec))
+    lgirsd = get_lgirreps(sgnum, Val(3))
+    timereversal && (foreach(zip(keys(lgirsd), values(lgirsd))) do (klab, lgirs)
+                        lgirsd[klab] = realify(lgirs)
+                     end)
+    lgirs_Γ = lgirsd["Γ"]
 
-    # mostly copied stuff from inimal_expansion_of_zero_freq_bands and
-    # find_minimum_bandreps_regular1L: should maybe be factored into a prepwork-part
-    sb, Γidxs = PBC.compatibility_bases_and_Γidxs(sgnum, lgirs_Γ, timereversal)
-    Nⁱʳʳ      = length(first(sb))
-    notΓidxs  = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
-
-    nontopo_sb, _ = nontopological_bases(sgnum, timereversal=timereversal)
-    nontopo_M     = SymmetryBases.matrix(nontopo_sb)
-    BRS           = bandreps(sgnum, timereversal=timereversal)
+    # prep-work to get Hilbert bases etc
+    BRS  = bandreps(sgnum, spinful=false, timereversal=timereversal)
+    B    = matrix(BRS, true) # Matrix with columns of EBRs.
+    F    = smith(B)          # Smith normal decomposition of B
+    Nⁱʳʳ = size(B, 1)        # number of irreps plus 1 (filling)
+    isℤ₁ = classification(BRS) == "Z₁"
+      
+    sb, _    = compatibility_bases(F, BRS;)
+    Γidxs    = PBC.get_Γidxs(lgirs_Γ, sb)   
+    notΓidxs = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
+    io ≠ stdout && println("   ... found general Hilbert basis (", length(sb), " bases)")
 
     ms¹ᴸ = PBC.find_representation¹ᴸ(lgirs_Γ)
     ms²ᵀ = PBC.find_representation²ᵀ(lgirs_Γ)
@@ -67,14 +83,10 @@ for sgnum in sgnums
 
     νᵗ               = νᵗstart-1
     Nsolutions_found = 0
-    Γkv_idx_in_sb    = findfirst(==("Γ"), sb.klabs)
-    topos =[]
-    println(io, "## SG $sgnum")
+    Γidx_in_sb       = findfirst(==("Γ"), sb.klabs)
     
     while true
         νᵗ += 1
-        verbose && print("   … νᵗ = ", νᵗ, ": ");
-
         cⁱs, νᵀ = check_target_filling_regular1L(νᵗ, ms¹ᴸ, ms, νsᴴ, sb, idx¹ᴸ, Γidxs, 
                                                  notΓidxs; verbose=verbose)
         
@@ -83,67 +95,104 @@ for sgnum in sgnums
         # Extract the "physical parts" of the symmetry vector (i.e. sans singular Γ-irreps)
         nᵀ⁺ᴸs = PBC.sum_symbases.(Ref(sb), cⁱs)
         nᴸ    = sb[idx¹ᴸ]
-        nᵀs   = nᵀ⁺ᴸs .-  Ref(nᴸ)
+        nᵀs   = nᵀ⁺ᴸs .- Ref(nᴸ)
         for nᵀ in nᵀs
             # tricky indexing: this achieves the ordering-adjusted subtraction into the `sb`
             # basis (note the broadcasted assignment, which is what makes this work)
             nᵀ[Γidxs] .-= ms²ᵀ
         end
         unique!(nᵀs) # remove equivalent solutions (due to expansion non-uniqueness)
-        
+        io ≠ stdout && println("   ... found ", length(nᵀs), " minimal connectivity solutions")
+
         # construct human-readable symmetry vectors
         ios = [IOBuffer() for _ in eachindex(nᵀs)]
-        Crystalline.prettyprint_symmetryvector.(ios, nᵀs, Ref(sb.irlabs))
+        prettyprint_symmetryvector.(ios, nᵀs, Ref(sb.irlabs))
         nᵀs_str = String.(take!.(ios))
 
         # insert (▪)²ᵀ in Γ-irrep spot
-        nᵀs_str .= add_content_to_symvec_str_at_kidx.(nᵀs_str, Γkv_idx_in_sb, Ref("(▪)²ᵀ"))
-        latex && (nᵀs_str .= convert_irreplabel2latex.(nᵀs_str)) # from /test/text_utils.jl
-
-        # find "Z₂" factor-type topology of each solution
-        topos = topology_from_2T1L_xor_1L.(nᵀs, Ref(nᴸ), Ref(ms²ᵀ), Ref(Γidxs), 
-                                           Ref(nontopo_M))
+        nᵀs_str .= add_content_to_symvec_str_at_kidx.(nᵀs_str, Γidx_in_sb, Ref(repr²ᵀ)) # from /test/text_utils.jl
+        if outputtype == "latex" 
+            nᵀs_str .= Ref('$'*"\\msf{").*convert_irreplabel2latex.(nᵀs_str).*Ref('}'*'$') # from /test/text_utils.jl
+        end
 
         # write results to screen
+        minN   = Nsolutions_found + 1
         plural = length(nᵀs) > 1
-        print(io, "\n", "νᵀ = ", νᵀ, " (", length(nᵀs), " solution", plural ? "s" : "")
-        if Crystalline.classification(BRS) ≠ "Z₁"
-            println(io, ")\n")
-            pretty_table(io,
-                [nᵀs_str topos],    # contents
-                ["nᵀ", "ℤ₂ index"]; # header row
-                tf = unicode,
-                vlines = :none, hlines = [:begin, 1, :end],
-                alignment = :l,
-                crop = :none,
-                #tf = markdown,
-                )
-        else
-            println(io, "; trivial symmetry indicator group, ℤ₁)\n")
-            pretty_table(io,
-                nᵀs_str,            # contents
-                ["nᵀ"];             # header row
-                tf = unicode,
-                vlines = :none, hlines = [:begin, 1, :end],
-                alignment = :l,
-                crop = :none,
-                #tf = markdown,
-                )
+
+        (isℤ₁ && minN == 1) && println(io, "[Trivial symmetry indicator group, ℤ₁]\n")
+        println(io,
+            "**", minN, ordinal_indicator(minN)," minimal solution:** ",
+            "νᵀ = ", νᵀ, " (", length(nᵀs), " symmetry vector", plural ? "s" : "", ")\n")
+
+        flush(io)
+        if minN == 1 # only print table for 1st minimal solution
+            if !isℤ₁
+                # find "Z₂" factor-type topology of each solution
+                Bℤ = MatrixSpace(ZZ, size(B)...)(B)
+                topos = topology_from_2T1L_xor_1L.(nᵀs, Ref(nᴸ), Ref(ms²ᵀ), Ref(Γidxs), 
+                                                   Ref(Bℤ))
+
+                io ≠ stdout && println("      ... computed associated xor-topology via EBRs")
+
+                contents = [nᵀs_str topos]
+                header   = ["nᵀ", "topology"]
+                if all(==(nontrivial), topos)
+                    println(io, "[Filling-enforced topology]\n")
+                end
+            else
+                contents = nᵀs_str
+                header   = ["nᵀ"]
+            end
+            pretty_table(io, contents, header; # contents & header row
+                             alignment = :l,
+                             table_config("latex")...
+                        )
+            println(io)
         end
+        flush(io)
 
         # check if we are done
         Nsolutions_found += 1
         Nsolutions_found ≥ Nsolutions && break
         if Nsolutions_found ≥ 1 && (sgnum ∈ (2,10,47))  # skip computational quagmires 
-            println("Skipped higher-order solutions for ", sgnum)
+            println(io, "\nSkipped higher-order solutions...")
             break
         end
     end # while
     println(io)
-    
-    #end # begin (@elapsed)
-    #println("SG ", sgnum, ": ", round(t, digits=1), " s")
-
+    stdout ≠ io && println("   → total time: ", round((time()-t₀)/60, digits=1), " min")
 end # for sgnum
-close(io)
-nothing
+io ≠ stdout && close(io)
+
+run(`cp $filepath $(filepath).bak`)
+# some manual clean-up
+if hasfield(typeof(io), :name) && occursin("<file", io.name)
+    if outputtype == "markdown"
+        run(`sed -i 's/|-/|:/g' $filepath`)
+        run(`sed -i 's/²ᵀ/\\T/g' $filepath`)
+    elseif outputtype == "latex"
+        subs = (                                                # don't change ordering here
+            r"νᵀ = ([0-9]*)"=>s"$\\nu\\oT = \1$",
+            "\\textbf{nᵀ}"=>"\$\\msf{\\boldsymbol{n}\\oT}\$",
+            "{ll}"=>"{lr}",
+            r"\*\*(.*)\*\*"=>s"\\paragraph*{\1}",
+            # fix horizontal lines
+            "}\n\\hline\\hline"=>"}\n\\toprule",
+            "\\endhead\n\\hline\\hline"=>"\\endhead\n\\bottomrule",
+            "\\\\\n\\hline\\hline\n"=>"\\\\\n",
+            "\\hline\\hline\n\\endfoot"=>"\\bottomrule\n\\endfoot",
+            "\\\\\\hline\\hline\n\\end"=>"\n\\end",
+            "\\hline"=>" \\midrule",
+            "\\endlastfoot"=>"\\bottomrule\n\\endlastfoot",
+            # classification: Z₁ => ℤ_{1} etc and × => \times
+            r"ℤ[₁|₂|₃|₄|₅|₆]"=>(x->"\\mathbb{Z}_{"*Crystalline.normalizesubsup(last(x))*"}"),
+            "×"=>"\\times",
+            r"\\mathbb{Z}(.*)([0-9])\}"=>s"$\\mathbb{Z}\1\2}$"
+            )
+        let s = read(filepath, String);
+            foreach(sub -> s = replace(s, sub), subs)
+            write(filepath[1:end-4]*"-edits.tex", s)
+        end
+    end
+    nothing
+end
