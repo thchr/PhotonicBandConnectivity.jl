@@ -5,7 +5,7 @@ function get_symvals²ᵀ⁺¹ᴸ(ops::AbstractVector{SymOperation{3}})
     symvals = Vector{ComplexF64}(undef, length(ops))
     for (i, op) in enumerate(ops)
         W = rotation(op)
-        rotval = Crystalline.rotation_order_3d(W)
+        rotval = Crystalline.rotation_order(W)
         n = abs(rotval)
         # This covers every case, including rotations, mirrors, rotoinversions, & inversion
         θ = 2π/n
@@ -26,7 +26,7 @@ function get_symvals²ᵀ(ops::AbstractVector{SymOperation{3}})
 
     for (i, op) in enumerate(ops)
         W = rotation(op)
-        rotval = Crystalline.rotation_order_3d(W)
+        rotval = Crystalline.rotation_order(W)
         
         n = abs(rotval) # rotation order 
 
