@@ -145,7 +145,7 @@ for sgnum in sgnums
             end
             pretty_table(io, contents, header; # contents & header row
                              alignment = :l,
-                             table_config("latex")...
+                             table_config(outputtype)...
                         )
             println(io)
         end
