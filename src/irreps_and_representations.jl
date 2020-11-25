@@ -6,9 +6,9 @@ Get the compatibility basis `sb` for `sgnum` with or without time-reversal symme
 indexes into the Γ point irreps in `sb`, computed from the Γ-point irreps `lgirs`.
 """
 
-function compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal)
+function compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal; allpaths::Bool=false)
     # Find the Hilbert basis that respects the compatibility relations
-    sb, _ = compatibility_bases(sgnum, spinful=false, timereversal=timereversal)
+    sb, _ = compatibility_bases(sgnum; spinful=false, timereversal=timereversal, allpaths=allpaths)
     # Find the indices of the Γ irreps in `BRS::BandRepSet` and `sb::SymBasis` and how they
     # map to the corresponding irrep indices in `lgirs`.
     # TODO: note that the irrep-sorting in sb and lgirs is not always the same (e.g. in ±

@@ -23,15 +23,17 @@ include("topology_as_2T1L_vs_1L_difference.jl")
 
 # ------------------------------------------------------------------------------------------
 
-function minimal_expansion_of_zero_freq_bands(sgnum::Integer; 
-                                              timereversal::Bool=true, verbose::Bool=true,
-                                              shuffle_1Lpick::Bool=false)
+function minimal_expansion_of_zero_freq_bands(
+            sgnum::Integer; 
+            timereversal::Bool=true, verbose::Bool=true, shuffle_1Lpick::Bool=false,
+            allpaths::Bool=false
+            )
 
     # Irreps at Γ, irrep-multiplicities of ω=0 2T bands, and symmetry operations
     lgirs = get_lgirreps(sgnum, Val(3))["Γ"]
     timereversal && (lgirs = realify(lgirs))
     lg = group(first(lgirs))
-    rotvals = map(op->(W=rotation(op); Crystalline.rotation_order_3d(det(W), tr(W))), lg)
+    rotvals = map(op->Crystalline.rotation_order(op), lg)
 
     # 2T irreps; check if "simple treatment"/fast-path is applicable
     ms²ᵀ = find_representation²ᵀ(lgirs)
@@ -44,7 +46,8 @@ function minimal_expansion_of_zero_freq_bands(sgnum::Integer;
         # the 2T branches. If that irrep is regular (i.e. has no negative coefficients), we
         # don't need to invoke 1L at all, and can solve for just 2T alone.
         r = find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ; 
-                                            safetychecks=true, verbose=verbose)
+                                            safetychecks=true, verbose=verbose,
+                                            allpaths=allpaths)
         return r..., nothing
         
     else 
@@ -59,7 +62,8 @@ function minimal_expansion_of_zero_freq_bands(sgnum::Integer;
 
         return find_minimum_bandreps_regular1L(sgnum, lgirs, timereversal, ms¹ᴸ, ms;
                                                verbose=verbose, 
-                                               shuffle_1Lpick=shuffle_1Lpick)
+                                               shuffle_1Lpick=shuffle_1Lpick,
+                                               allpaths=allpaths)
     end
     # TODO: The returned coefficients cⁱs do not necessarily each describe different 
     #       symmetry vectors n, since the Hilbert basis is not linearly independent.
@@ -68,10 +72,11 @@ function minimal_expansion_of_zero_freq_bands(sgnum::Integer;
 end
 
 function find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ; 
-                                         verbose::Bool=true, safetychecks::Bool=false)
+                                         verbose::Bool=true, safetychecks::Bool=false,
+                                         allpaths::Bool=false)
     verbose && println("SG ", sgnum)
 
-    sb, Γidxs = compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal)
+    sb, Γidxs = compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal; allpaths=allpaths)
     νsᴴ = fillings(sb)
     νᴴₘₐₓ = maximum(νsᴴ)
 
@@ -110,10 +115,11 @@ function find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ;
 end
 
 function find_minimum_bandreps_regular1L(sgnum, lgirs, timereversal, ms¹ᴸ, ms;
-                                         verbose::Bool=false, shuffle_1Lpick::Bool=false)
+                                         verbose::Bool=false, shuffle_1Lpick::Bool=false,
+                                         allpaths::Bool=false)
     verbose && print("SG ", sgnum)
 
-    sb, Γidxs = compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal)
+    sb, Γidxs = compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal; allpaths=allpaths)
     Nⁱʳʳ = length(first(sb))
     notΓidxs = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
     νsᴴ = fillings(sb)
