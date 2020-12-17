@@ -203,6 +203,46 @@ function check_target_filling_regular1L(νᵗ, ms¹ᴸ, ms, νsᴴ, sb::SymBasis
 
     return cⁱs, νᵀ    # if no solutions were valid, `cⁱs` will be empty
 end
-# -----------------------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------------------
+# A simpler version of the above problem is to calculate the minimal connectivities in
+# a phononic or magnonic problem, where the 1L modes are real. Then we don't need to
+# subsequently factor out the 1L solutions - instead, we can work with the 1L+2L solely.
+# The function below implements this, returning the minimal connectivities in bosonic
+# systems where the longitudinal modes are real.
+
+function minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands(sgnum, timereversal;
+            verbose::Bool=false, allpaths::Bool=false, safetychecks::Bool=false)
+
+    # Irreps at Γ, irrep-multiplicities of ω=0 2T bands, and symmetry operations
+    lgirs   = get_lgirreps(sgnum, Val(3))["Γ"]
+    timereversal && (lgirs = realify(lgirs))
+    lg      = group(first(lgirs))
+
+    # Hilbert bases and "default" connectivities
+    sb, Γidxs = compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal; allpaths=allpaths)
+    νsᴴ       = fillings(sb)
+    νᴴₘₐₓ     = maximum(νsᴴ)
+
+    # 2T+1L symmetry constraints
+    ms     = find_representation²ᵀ⁺¹ᴸ(lgirs)
+    ntidxs = find_symmetry_constrained_bases(sb, ms, Γidxs)
+
+    maxterms = 5
+    for νᵗ in 3:3νᴴₘₐₓ # target filling for 2T+1L branches (≥3)
+        cⁱs = filling_symmetry_constrained_expansions(νᵗ, ms, νsᴴ, sb, Γidxs, 
+                                                ntidxs,   # include only "nontrivial" bases
+                                                maxterms) # limit to two basis terms
+
+        if !isempty(cⁱs)
+            verbose && println("   ⇒ νᵀ = ", νᵗ, ": ", length(cⁱs), " valid expansions")            
+            safetychecks && safetycheck²ᵀ(cⁱs, νᵗ, ms, νsᴴ, sb, Γidxs)
+            
+            return cⁱs, νᵗ, sb
+        end
+    end
+    throw("Found no valid expansions consistent with constraints")
+end
+
+# -----------------------------------------------------------------------------------------
 end # module
