@@ -144,7 +144,7 @@ function find_minimum_bandreps_regular1L(sgnum, lgirs, timereversal, ms¹ᴸ, ms
     # find _all_ feasible solutions to ms constraints for fixed and minimal νᵗ; we use a 
     # recursive looping construct to find candidate expansions
     max_patience_νᵗ = max(4*νᴴₘₐₓ, 8)
-    for νᵗ in 3:max_patience_νᵗ # target filling (≥3) (function returns from loop)
+    for νᵗ in (2+νᴸ):max_patience_νᵗ # target filling (≥2+νᴸ) (function returns from loop)
         verbose && print("   … νᵗ = ", νᵗ, ": ")
 
         cⁱs, νᵀ = check_target_filling_regular1L(νᵗ, ms¹ᴸ, ms, νsᴴ, sb, idx¹ᴸ, Γidxs, notΓidxs;
