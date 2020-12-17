@@ -2,11 +2,13 @@
     find_symmetry_constrained_bases(sb::SymBasis, ms::AbstractVector{Int},
                                     Γidxs::AbstractVector{Int})
 
-From a Hilbert basis, specified via `sb::SymBasis` whose elements are the Hilbert basis
-vectors, find those that has at least one positive element in overlap with a set irrep 
-multiplicities `ms`, whose indices in the rows of the Hilbert basis vectors are specified by
-`Γidxs`.
-Returns an array of indices into the the vectors of `sb`.
+Return a vector of indices `idxs` into a Hilbert basis `sb::SymBasis` (a basis whose
+elements are Hilbert basis vectors), such that `sb[idx]` for each `idx ∈ idxs` has at
+least one positive element in overlap with a set of irrep multiplicities `ms`.
+
+The correspondence between irrep labels in `ms` and theose in the vectors of `sb`, is
+specified by `Γidxs`, such that the labels of `ms` equal the labels of `sb[i][Γidxs]` for
+each `i`.
 """
 function find_symmetry_constrained_bases(sb::SymBasis, ms::AbstractVector{Int},
                                          Γidxs::AbstractVector{Int})
@@ -139,7 +141,7 @@ function safetycheck²ᵀ(cⁱs, ν²ᵀᵗ, ms²ᵀ, νsᴴ, sb, Γidxs)
     # Check that it didn't matter whether we excluded "trivial" basis elements or not
     cⁱs′ = filling_symmetry_constrained_expansions(ν²ᵀᵗ, ms²ᵀ, νsᴴ, sb, Γidxs)
     Set(cⁱs) ≠ Set(cⁱs′) && throw("Did not obtain equivalent solution sets")
-end             
+end
 
 function isvalid_solution(cⁱ::Vector{Int}, νᵗ::Int, ms::Vector{Int}, sb::SymBasis, Γidxs)
     n = sum_symbases(sb, cⁱ)

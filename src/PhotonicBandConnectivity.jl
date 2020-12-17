@@ -97,7 +97,6 @@ function find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ;
     # irrep as a nonzero index of `ms`; we can ignore all the others
     ntidxs²ᵀ = find_symmetry_constrained_bases(sb, ms²ᵀ, Γidxs)
 
-    cⁱs = Vector{Int}[]
     maxterms = 2
     for ν²ᵀᵗ in 2:2νᴴₘₐₓ # target filling for 2T branches (≥2)
         cⁱs = filling_symmetry_constrained_expansions(ν²ᵀᵗ, ms²ᵀ, νsᴴ, sb, Γidxs, 
