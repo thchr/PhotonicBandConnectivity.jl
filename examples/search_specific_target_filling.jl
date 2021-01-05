@@ -30,8 +30,8 @@ end
 
 sgnums       = 1:230#1:230
 timereversal = false
-Nsolutions   = 2 # how many νᵀ solutions we want
-νᵗstart      = 3 # start target filling
+Nsolutions   = 2 # how many μᵀ solutions we want
+μᵗstart      = 3 # start target filling
 outputtype   = "latex"
 #tablename    = "connectivity_tables"*(timereversal ? "" : "_tr-broken")*".md"
 #filepath     = "/mnt/c/Dropbox (MIT)/Web/thchr.github.io/_assets/"*tablename
@@ -74,23 +74,23 @@ for sgnum in sgnums
     ms   = PBC.find_representation²ᵀ⁺¹ᴸ(lgirs_Γ)
 
     ntidxs¹ᴸ  = PBC.find_symmetry_constrained_bases(sb, ms¹ᴸ, Γidxs)
-    νsᴴ       = PBC.fillings(sb)
-    _, pick¹ᴸ = findmin(νsᴴ[ntidxs¹ᴸ])
+    μsᴴ       = PBC.fillings(sb)
+    _, pick¹ᴸ = findmin(μsᴴ[ntidxs¹ᴸ])
     idx¹ᴸ     = ntidxs¹ᴸ[pick¹ᴸ]
 
     #--------------------------------------------------------------------------------------
     # FINDING VALID SOLUTIONS
 
-    νᵗ               = νᵗstart-1
+    μᵗ               = μᵗstart-1
     Nsolutions_found = 0
     Γidx_in_sb       = findfirst(==("Γ"), sb.klabs)
     
     while true
-        νᵗ += 1
-        cⁱs, νᵀ = check_target_filling_regular1L(νᵗ, ms¹ᴸ, ms, νsᴴ, sb, idx¹ᴸ, Γidxs, 
+        μᵗ += 1
+        cⁱs, μᵀ = check_target_filling_regular1L(μᵗ, ms¹ᴸ, ms, μsᴴ, sb, idx¹ᴸ, Γidxs, 
                                                  notΓidxs; verbose=verbose)
         
-        isempty(cⁱs) && continue # go to next νᵗ if no solutions found
+        isempty(cⁱs) && continue # go to next μᵗ if no solutions found
 
         # Extract the "physical parts" of the symmetry vector (i.e. sans singular Γ-irreps)
         nᵀ⁺ᴸs = PBC.sum_symbases.(Ref(sb), cⁱs)
@@ -122,7 +122,7 @@ for sgnum in sgnums
         (isℤ₁ && minN == 1) && println(io, "[Trivial symmetry indicator group, ℤ₁]\n")
         println(io,
             "**", minN, ordinal_indicator(minN)," minimal solution:** ",
-            "νᵀ = ", νᵀ, " (", length(nᵀs), " symmetry vector", plural ? "s" : "", ")\n")
+            "μᵀ = ", μᵀ, " (", length(nᵀs), " symmetry vector", plural ? "s" : "", ")\n")
 
         flush(io)
         if minN == 1 # only print table for 1st minimal solution
@@ -172,7 +172,7 @@ if hasfield(typeof(io), :name) && occursin("<file", io.name)
         run(`sed -i 's/²ᵀ/\\T/g' $filepath`)
     elseif outputtype == "latex"
         subs = (                                                # don't change ordering here
-            r"νᵀ = ([0-9]*)"=>s"$\\nu\\oT = \1$",
+            r"μᵀ = ([0-9]*)"=>s"$\\mu\\oT = \1$",
             "\\textbf{nᵀ}"=>"\$\\msf{\\boldsymbol{n}\\oT}\$",
             "{ll}"=>"{lr}",
             r"\*\*(.*)\*\*"=>s"\\paragraph*{\1}",
@@ -187,7 +187,9 @@ if hasfield(typeof(io), :name) && occursin("<file", io.name)
             # classification: Z₁ => ℤ_{1} etc and × => \times
             r"ℤ[₁|₂|₃|₄|₅|₆]"=>(x->"\\mathbb{Z}_{"*Crystalline.normalizesubsup(last(x))*"}"),
             "×"=>"\\times",
-            r"\\mathbb{Z}(.*)([0-9])\}"=>s"$\\mathbb{Z}\1\2}$"
+            r"\\mathbb{Z}(.*)([0-9])\}"=>s"$\\mathbb{Z}\1\2}$",
+            # make sure Γ irreps come as the first element in the vector
+            r"\[(.*), (\(\\smallsquare\)\\tT.*?)([, |\]])" => s"[$2, $1$3"
             )
         let s = read(filepath, String);
             foreach(sub -> s = replace(s, sub), subs)
