@@ -54,8 +54,8 @@ for (sgidx, sgnum) in enumerate(sgnums)
     topo_class = classification(BRS)
     print("\t [", topo_class)
 
-    nontopo_sb, _ = nontopological_bases(F, BRS)
-    trivial_idxs, fragile_idxs = split_fragiletrivial_bases(nontopo_sb, B)
+    nontopo_sb = nontopological_basis(F, BRS)
+    trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, B)
     println(!isempty(fragile_idxs) ? "+fragile" : "", "]")
 
     flush(stdout)

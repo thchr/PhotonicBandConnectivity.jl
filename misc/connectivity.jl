@@ -123,7 +123,7 @@ end
 
 timereversal = true;
 sgnum = 230;
-sb = compatibility_bases(sgnum)[1];
+sb = compatibility_basis(sgnum, 3)[1];
 lgirsd = get_lgirreps(sgnum, Val(3));
 if timereversal
     foreach((klab, lgirs)->(lgirsd[klab] = realify(lgirs)), zip(keys(lgirsd), values(lgirsd)))

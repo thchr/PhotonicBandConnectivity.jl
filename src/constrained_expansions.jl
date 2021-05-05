@@ -31,7 +31,7 @@ end
 
 """
     filling_symmetry_constrained_expansions(νᵗ::Integer, ms::AbstractVector{<:Integer}, νsᴴ,
-                                            sb::SymBasis, Γidxs, 
+                                            sb::SymBasis, Γidxs;
                                             ntidxs=eachindex(sb),
                                             maxdepth=div(νᵗ, minimum(νsᴴ), RoundDown))
 
@@ -48,8 +48,11 @@ with non-negative, integer coefficients {cᵢ∈ℕ} and (b) satisfy the symmetr
 evaluated only at the Γ-point, whose indices into the ``𝐧ᵢᴴ`` vector are specified by
 `Γidxs`.
 
-Optionally, if the caller wants to restrict the expansion to a subset of the bases in `sb`,
-the argument `ntidxs` can provide an indexing into allowable bases of `sb`.
+# Keyword arguments
+- `ntidxs`: Optionally, if the caller wants to restrict the expansion to a subset of the
+  bases in `sb`, the argument `ntidxs` can provide an indexing into allowable bases of `sb`.
+- `maxdepth`: include at most `maxdepth` distinct Hilbert basis vectors (see Implementation
+  notes below).
 
 # Implementation
 Recursion is used to build a nested set of for loops, of depth `maxdepth`, corresponding 
@@ -63,7 +66,7 @@ despite being less capable or much slower, respectively, in the belief that they
 provide a simpler illustration of the conceptual approach.
 """
 function filling_symmetry_constrained_expansions(νᵗ::Integer, ms::AbstractVector{<:Integer},
-                                        νsᴴ, sb::SymBasis, Γidxs,
+                                        νsᴴ, sb::SymBasis, Γidxs;
                                         ntidxs=eachindex(sb),
                                         maxdepth::Integer=div(νᵗ, minimum(νsᴴ), RoundDown))
 

@@ -57,7 +57,7 @@ F    = smith(B)          # Smith normal decomposition of B
 Nⁱʳʳ = size(B, 1)        # number of irreps plus 1 (filling)
 isℤ₁ = classification(BRS) == "Z₁"
     
-sb, _    = compatibility_bases(F, BRS;)
+sb       = compatibility_basis(F, BRS;)
 Γidxs    = PBC.get_Γidxs(lgirs_Γ, sb)   
 notΓidxs = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
 io ≠ stdout && println("   ... found general Hilbert basis (", length(sb), " bases)")

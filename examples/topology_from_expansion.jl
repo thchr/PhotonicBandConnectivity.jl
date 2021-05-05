@@ -3,7 +3,7 @@ using Crystalline: rotation, rotation_order_3d,
                    prettyprint_symmetryvector, formatirreplabel
 using PhotonicBandConnectivity
 using SymmetryBases
-using PrettyTables: pretty_table, unicode, markdown
+using PrettyTables: pretty_table
 includet("text_utils.jl"); using Main.TextUtils
 
 #=  
@@ -40,11 +40,11 @@ for (sgidx, sgnum) in enumerate(sgnums)
 
     # get Hilbert bases and minimal connectivities + symmetry vectors
     cⁱs, νᵀ, sb, _ = minimal_expansion_of_zero_freq_bands.(sgnum, timereversal=has_tr, verbose=false)
-    nontopo_sb = nontopological_bases(sgnum, timereversal=has_tr)[1]
+    nontopo_sb = nontopological_basis(sgnum, timereversal=has_tr)[1]
 
     # determine the trivial, respectively fragile indices in nontopo_sb
     BRS = bandreps(sgnum, timereversal=has_tr)
-    trivial_idxs, fragile_idxs = split_fragiletrivial_bases(nontopo_sb, BRS)
+    trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, BRS)
 
     # compute the unique symmetry vectors for each compatibility-constrained band solution
     nᵀs = unique!(sort(sum_symbases.(Ref(sb), cⁱs)))
@@ -101,11 +101,11 @@ for (sgidx, sgnum) in enumerate(sgnums)
     pretty_table(io,
         [nᵀs_str topos],    # contents
         ["nᵀ", "topology"]; # header row
-        #tf = unicode,
+        #tf = tf_unicode,
         #vlines = :none, hlines = [:begin, 1, :end],
         alignment = :l,
         crop = :none,
-        tf = markdown,
+        tf = tf_markdown,
     )
     println(io)
 end

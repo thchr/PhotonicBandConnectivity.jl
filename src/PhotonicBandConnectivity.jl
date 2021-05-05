@@ -76,7 +76,7 @@ function find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ;
                                          allpaths::Bool=false)
     verbose && println("SG ", sgnum)
 
-    sb, Γidxs = compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal; allpaths=allpaths)
+    sb, Γidxs = compatibility_basis_and_Γidxs(lgirs; timereversal, allpaths)
     νsᴴ = fillings(sb)
     νᴴₘₐₓ = maximum(νsᴴ)
 
@@ -97,11 +97,11 @@ function find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ;
     # irrep as a nonzero index of `ms`; we can ignore all the others
     ntidxs²ᵀ = find_symmetry_constrained_bases(sb, ms²ᵀ, Γidxs)
 
-    maxterms = 2
+    maxdepth = 2
     for ν²ᵀᵗ in 2:2νᴴₘₐₓ # target filling for 2T branches (≥2)
-        cⁱs = filling_symmetry_constrained_expansions(ν²ᵀᵗ, ms²ᵀ, νsᴴ, sb, Γidxs, 
-                                                ntidxs²ᵀ, # include only "nontrivial" bases
-                                                maxterms) # limit to two basis terms
+        cⁱs = filling_symmetry_constrained_expansions(ν²ᵀᵗ, ms²ᵀ, νsᴴ, sb, Γidxs;
+                                    ntidxs = ntidxs²ᵀ,   # include only "nontrivial" bases
+                                    maxdepth = maxdepth) # limit to two basis terms
 
         if !isempty(cⁱs)
             verbose && println("   ⇒ νᵀ = ", ν²ᵀᵗ, ": ", length(cⁱs), " valid expansions")            
@@ -118,7 +118,7 @@ function find_minimum_bandreps_regular1L(sgnum, lgirs, timereversal, ms¹ᴸ, ms
                                          allpaths::Bool=false)
     verbose && print("SG ", sgnum)
 
-    sb, Γidxs = compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal; allpaths=allpaths)
+    sb, Γidxs = compatibility_basis_and_Γidxs(lgirs; timereversal, allpaths)
     Nⁱʳʳ = length(first(sb))
     notΓidxs = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
     νsᴴ = fillings(sb)
@@ -220,7 +220,7 @@ function minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands(sgnum, timereversal;
     lg      = group(first(lgirs))
 
     # Hilbert bases and "default" connectivities
-    sb, Γidxs = compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal; allpaths=allpaths)
+    sb, Γidxs = compatibility_basis_and_Γidxs(lgirs; timereversal, allpaths)
     νsᴴ       = fillings(sb)
     νᴴₘₐₓ     = maximum(νsᴴ)
 
@@ -228,11 +228,9 @@ function minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands(sgnum, timereversal;
     ms     = find_representation²ᵀ⁺¹ᴸ(lgirs)
     ntidxs = find_symmetry_constrained_bases(sb, ms, Γidxs)
 
-    maxterms = 5
     for νᵗ in 3:3νᴴₘₐₓ # target filling for 2T+1L branches (≥3)
-        cⁱs = filling_symmetry_constrained_expansions(νᵗ, ms, νsᴴ, sb, Γidxs, 
-                                                ntidxs,   # include only "nontrivial" bases
-                                                maxterms) # limit to two basis terms
+        cⁱs = filling_symmetry_constrained_expansions(νᵗ, ms, νsᴴ, sb, Γidxs; 
+                                    ntidxs = ntidxs)  # include only "nontrivial" bases
 
         if !isempty(cⁱs)
             verbose && println("   ⇒ νᵀ = ", νᵗ, ": ", length(cⁱs), " valid expansions")            

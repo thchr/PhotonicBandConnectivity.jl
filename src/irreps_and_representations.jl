@@ -1,20 +1,25 @@
 """
     $(SIGNATURES)
 
-Get the compatibility basis `sb` for `sgnum` with or without time-reversal symmetry
-(corresponding to `timereversal=true` or `false`, respectively), as well as the associated
-indexes into the Γ point irreps in `sb`, computed from the Γ-point irreps `lgirs`.
+Get the compatibility basis `sb` associated with the `LGIrreps`s `lgirs` with or
+without time-reversal symmetry (set by `timereversal=true` or `false`, respectively),
+as well as the associated indexes into the Γ point irreps in `sb`, computed from the
+Γ-point irreps `lgirs`.
+The space group number is inferred from the provided vector of `LGIrrep`s.
 """
-
-function compatibility_bases_and_Γidxs(sgnum, lgirs, timereversal; allpaths::Bool=false)
+function compatibility_basis_and_Γidxs(lgirs::AbstractVector{LGIrrep{D}};
+                                       timereversal::Bool=false, 
+                                       allpaths::Bool=false) where D
+    sgnum = num(group(first(lgirs)))
     # Find the Hilbert basis that respects the compatibility relations
-    sb, _ = compatibility_bases(sgnum; spinful=false, timereversal=timereversal, allpaths=allpaths)
+    sb, _ = compatibility_basis(sgnum, D;
+                        spinful=false, timereversal=timereversal, allpaths=allpaths)
     # Find the indices of the Γ irreps in `BRS::BandRepSet` and `sb::SymBasis` and how they
     # map to the corresponding irrep indices in `lgirs`.
     # TODO: note that the irrep-sorting in sb and lgirs is not always the same (e.g. in ±
     #       irreps), so we are not guaranteed that Γidxs is a simple range (e.g., it could 
     #       be [1,3,5,2,4,6]). We really ought to align the irreps sorting in `get_lgirreps`
-    #       versus `bandreps` (BRS) and `compatibility_bases` (sb).
+    #       versus `bandreps` (BRS) and `compatibility_basis` (sb).
     Γidxs = get_Γidxs(lgirs, sb)
 
     return sb, Γidxs

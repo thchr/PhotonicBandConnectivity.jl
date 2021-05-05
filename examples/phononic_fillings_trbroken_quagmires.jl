@@ -11,7 +11,7 @@ using JLD2
 
 # pretty much the same purpose as `examples/phononic_fillings.jl`, except we here focus on
 # the computational quagmires in the tr-broken case for space groups 83, 174, 175, and 176. 
-# for these space groups, computing `nontopological_bases(...)` is pretty much impossible
+# for these space groups, computing `nontopological_basis(...)` is pretty much impossible
 # (at least, doesn't terminate in +24 h on a laptop), so to verify that they don't host 
 # filling enforced topology, we just check that they indeed have both trivial and nontrivial
 # states in their solution space. We do this by using `calc_detailed_topology` but with 

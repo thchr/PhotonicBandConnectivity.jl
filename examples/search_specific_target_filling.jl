@@ -18,9 +18,9 @@ function table_config(type::String)
                 table_type = :longtable, 
                 longtable_footer = "\\emph{\\footnotesize\\ldots\\ continued on next page}")
     elseif type == "unicode"
-        return (crop = :none, tf = unicode, vlines = :none, hlines = [:begin, 1, :end])
+        return (crop = :none, tf = tf_unicode, vlines = :none, hlines = [:begin, 1, :end])
     elseif type == "markdown"
-        return (crop = :none, tf = markdown)
+        return (crop = :none, tf = tf_markdown)
     end
 end
 
@@ -28,17 +28,17 @@ end
 #------------------------------------------------------------------------------------------
 # SETUP
 
-sgnums       = 1:230#1:230
+sgnums       = 1:230
 timereversal = false
 Nsolutions   = 2 # how many μᵀ solutions we want
 μᵗstart      = 3 # start target filling
-outputtype   = "latex"
+outputtype   = "unicode"
 #tablename    = "connectivity_tables"*(timereversal ? "" : "_tr-broken")*".md"
 #filepath     = "/mnt/c/Dropbox (MIT)/Web/thchr.github.io/_assets/"*tablename
-tablename    = "connectivity-tr-"*(timereversal ? "invariant" : "broken")*".tex"
-filepath     = "/mnt/c/Dropbox (MIT)/Projects/photonic-topo-sym/band-connectivities/manuscript/tables/"*tablename
-io           = open(filepath, "w+")
-#io           = stdout
+#tablename    = "connectivity-tr-"*(timereversal ? "invariant" : "broken")*".tex"
+#filepath     = "/mnt/c/Dropbox (MIT)/Projects/photonic-topo-sym/band-connectivities/manuscript/tables/"*tablename
+#io           = open(filepath, "w+")
+io           = stdout
 verbose      = false
 t₀           = time()
 
@@ -64,7 +64,7 @@ for sgnum in sgnums
     Nⁱʳʳ = size(B, 1)        # number of irreps plus 1 (filling)
     isℤ₁ = classification(BRS) == "Z₁"
       
-    sb, _    = compatibility_bases(F, BRS;)
+    sb       = compatibility_basis(F, BRS)
     Γidxs    = PBC.get_Γidxs(lgirs_Γ, sb)   
     notΓidxs = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
     io ≠ stdout && println("   ... found general Hilbert basis (", length(sb), " bases)")
@@ -164,6 +164,7 @@ for sgnum in sgnums
 end # for sgnum
 io ≠ stdout && close(io)
 
+if io ≠ stdout
 run(`cp $filepath $(filepath).bak`)
 # some manual clean-up
 if hasfield(typeof(io), :name) && occursin("<file", io.name)
@@ -197,4 +198,5 @@ if hasfield(typeof(io), :name) && occursin("<file", io.name)
         end
     end
     nothing
+end
 end
