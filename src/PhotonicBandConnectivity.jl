@@ -20,6 +20,8 @@ include("symbasis_utils.jl")
 include("constrained_expansions.jl")
 #include("src/legacy_constrained_expansions.jl")
 include("topology_as_2T1L_vs_1L_difference.jl")
+include("is_transverse_bandstruct.jl")
+export is_transverse_bandstruct
 
 # ------------------------------------------------------------------------------------------
 
