@@ -92,14 +92,9 @@ for pgnum in 1:17
     BRS = bandreps(pgnum, 2, timereversal=timereversal)
     B   = matrix(BRS, true)
     F   = Crystalline.smith(B)
-    nontopo_sb, _ = nontopological_basis(F, BRS)
-    trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, B)
-    M         = matrix(sb)
-    nontopo_M = matrix(nontopo_sb)
-    trivial_M = nontopo_M[:,trivial_idxs]
 
-    toposᵀᴱ = calc_detailed_topology.(nsᵀᴱ, Ref(nontopo_M), Ref(trivial_M), Ref(M))
-    toposᵀᴹ = calc_detailed_topology.(nsᵀᴹ, Ref(nontopo_M), Ref(trivial_M), Ref(M))
+    toposᵀᴱ = calc_detailed_topology.(nsᵀᴱ, Ref(B), Ref(F))
+    toposᵀᴹ = calc_detailed_topology.(nsᵀᴹ, Ref(B), Ref(F))
 
 
     println("═════ Plane group $pgnum ($(iuc(pgnum, 2)) [parent space group $sgnum] ═════")

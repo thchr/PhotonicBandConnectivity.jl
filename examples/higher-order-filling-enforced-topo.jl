@@ -1,4 +1,3 @@
-using Nemo
 using Crystalline
 using Crystalline: smith, classification, prettyprint_symmetryvector
 using PhotonicBandConnectivity
@@ -101,11 +100,10 @@ for sgnum in sgnums
         flush(stdout)
 
         # find "Z₂" factor-type topology of each solution
-        Bℤ = MatrixSpace(ZZ, size(B)...)(B)
         topos = Vector{TopologyKind}(undef, length(nᵀs))
         filling_enforced = true
         for (idx, nᵀ) in enumerate(nᵀs)
-            topos[idx] = topology_from_2T1L_xor_1L(nᵀ, nᴸ, ms²ᵀ, Γidxs, Bℤ)
+            topos[idx] = topology_from_2T1L_xor_1L(nᵀ, nᴸ, ms²ᵀ, Γidxs, F)
             topos[idx] == nontrivial || (filling_enforced = false; break)
         end
 

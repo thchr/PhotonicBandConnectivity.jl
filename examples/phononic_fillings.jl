@@ -6,21 +6,19 @@ using Crystalline: prettyprint_symmetryvector
 using SymmetryBases
 using PhotonicBandConnectivity
 using PhotonicBandConnectivity: minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands
-using Nemo: MatrixSpace, ZZ
 using ProgressMeter
 using JLD2
 
 # find all the minimum fillings below the fundamental gap in systems where the longitudinal
 # bands are real, such as in phononic or magnonic systems
 sgnums   = 1:230
-has_tr   = true
-workhard = true
+has_tr   = false
 savedata = false
+show_has_fragile_phases = false
 
 μ²ᵀ⁺¹ᴸs = Vector{Int}(undef, length(sgnums)) # minimal fillings below fundamental gap
 μs      = Vector{Int}(undef, length(sgnums))
 topos   = Vector{Vector{TopologyKind}}(undef, length(sgnums))
-n²ᵀ⁺¹ᴸs_str = Vector{Vector{String}}(undef, length(sgnums))
 for (sgidx, sgnum) in enumerate(sgnums)
     print("SG ", sgnum, ":\t")
     
@@ -32,61 +30,43 @@ for (sgidx, sgnum) in enumerate(sgnums)
     n²ᵀ⁺¹ᴸs = unique!(sort(sum_symbases.(Ref(sb), cⁱs)))
     print(" w/ ", length(n²ᵀ⁺¹ᴸs), " solution", length(n²ᵀ⁺¹ᴸs)≠1 ? "s" : "")
 
-    # pretty-print the symmetry vector solutions
-    ios = [IOBuffer() for _ in eachindex(n²ᵀ⁺¹ᴸs)]
-    prettyprint_symmetryvector.(ios, n²ᵀ⁺¹ᴸs, Ref(sb.irlabs))
-    n²ᵀ⁺¹ᴸs_str[sgidx] = String.(take!.(ios))
-
-    # bail out on computational quagmires for topology evaluation
-    if (!workhard &&
-        # the tr-broken specific ones are just extremely slow to compute nontopo_sb for; 
-        # didn't check fragile phases for those (didn't terminate in +24h for any case)
-        (has_tr && sgnum ∈ (2,10,47) || (!has_tr && sgnum ∈ (83,174,175,176))) )
-
-        topos[sgidx] = TopologyKind[]
-        println("\t [skipped...]"); continue
-    end
-    
-    # calculate topology
+    # get EBRs
     BRS = bandreps(sgnum, 3, timereversal=has_tr)
     B   = matrix(BRS, true)
     F   = Crystalline.smith(B)
-    topo_class = classification(BRS)
-    print("\t [", topo_class)
 
-    nontopo_sb = nontopological_basis(F, BRS)
-    trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, B)
-    println(!isempty(fragile_idxs) ? "+fragile" : "", "]")
-
-    flush(stdout)
-    if isempty(fragile_idxs)
-        topo_class == "Z₁" && (topos[sgidx] = fill(trivial, length(n²ᵀ⁺¹ᴸs)); continue)
-
-        Bℤ       = MatrixSpace(ZZ, size(B)...)(B)  # Nemo-version of matrix
-        topos[sgidx] = @showprogress map(n -> calc_topology(n, Bℤ), n²ᵀ⁺¹ᴸs)
-    else
-        M         = matrix(sb)
-        nontopo_M = matrix(nontopo_sb)
-        trivial_M = nontopo_M[:,trivial_idxs]
-        topos[sgidx] = @showprogress map(n²ᵀ⁺¹ᴸs) do n
-                            calc_detailed_topology(n, nontopo_M, trivial_M, 
-                                                   workhard ? M : nothing)
-                       end
+    # print symmetry-identifiable class of space group
+    print("\t [", classification(BRS))
+    if show_has_fragile_phases 
+        if !has_tr && sgnum ∈ (83,174,175,176)
+            # the non-topological basis for tr-broken SGs 83, 174, 175, 176 is extremely
+            # slow (does not terminate in +24h); so we just don't bother to print the
+            # general information about fragility here
+            print(" | skipped fragility check (quagmire)]")
+        else
+            nontopo_sb = nontopological_basis(F, BRS)
+            trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, B)
+            !isempty(fragile_idxs) && print("+fragile")
+        end
     end
+    println("]"); flush(stdout)
+
+    # calculate trivial/nontrivial/fragile topology classification of all solutions
+    topos[sgidx] = @showprogress map(n -> calc_detailed_topology(n, B, F), n²ᵀ⁺¹ᴸs)
 
     # print if filling-enforced topology detected
-    if all(==(nontrivial), topos[sgidx])
+    if all(==(NONTRIVIAL), topos[sgidx])
         println("\t⇒ Filling-enforced stable topology!")
-    elseif all(==(fragile), topos[sgidx])
+    elseif all(==(FRAGILE), topos[sgidx])
         println("\t⇒ Filling-enforced fragile topology!")
-    elseif all(≠(trivial), topos[sgidx])
+    elseif all(≠(TRIVIAL), topos[sgidx])
         println("\t⇒ Filling-enforced mixed stable & fragile topology")
     end
 end
 
 # save data, if requested
 if savedata && sgnums == 1:230 && has_tr
-    @save "phonon-connectivity-result-with-tr.jld2" sgnums has_tr workhard μ²ᵀ⁺¹ᴸs μs topos
+    @save "phonon-connectivity-result-with-tr.jld2" sgnums has_tr μ²ᵀ⁺¹ᴸs μs topos
 elseif savedata && sgnums == 1:230 && !has_tr
-    @save "phonon-connectivity-result-without-tr.jld2" sgnums has_tr workhard μ²ᵀ⁺¹ᴸs μs topos
+    @save "phonon-connectivity-result-without-tr.jld2" sgnums has_tr μ²ᵀ⁺¹ᴸs μs topos
 end

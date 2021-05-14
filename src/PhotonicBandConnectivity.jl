@@ -4,7 +4,6 @@ using Crystalline
 using SymmetryBases
 using LinearAlgebra
 using DocStringExtensions
-using Nemo
 
 using Crystalline: rotation
 

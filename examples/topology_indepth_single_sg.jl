@@ -1,4 +1,3 @@
-using Nemo
 using Crystalline
 using Crystalline: matrix, smith, classification, prettyprint_symmetryvector
 using PhotonicBandConnectivity
@@ -121,9 +120,7 @@ while true
     # print tables for every "n"th order minimal solution
     if !isℤ₁
         # find "Z₂" factor-type topology of each solution
-        Bℤ = MatrixSpace(ZZ, size(B)...)(B)
-        topos = topology_from_2T1L_xor_1L.(nᵀs, Ref(nᴸ), Ref(ms²ᵀ), Ref(Γidxs), 
-                                            Ref(Bℤ))
+        topos = topology_from_2T1L_xor_1L.(nᵀs, Ref(nᴸ), Ref(ms²ᵀ), Ref(Γidxs), Ref(F))
 
         io ≠ stdout && println("      ... computed associated xor-topology via EBRs")
 

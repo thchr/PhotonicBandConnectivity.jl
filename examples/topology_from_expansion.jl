@@ -38,28 +38,27 @@ io = open(filepath, "w+")
 for (sgidx, sgnum) in enumerate(sgnums)
     # --- analyze topology of minimal connectivities ---
 
+    # band representations
+    BRS = bandreps(sgnum, 3; timereversal=has_tr)
+    B   = matrix(BRS, true)
+    F   = smith(B)
+
     # get Hilbert bases and minimal connectivities + symmetry vectors
     cⁱs, νᵀ, sb, _ = minimal_expansion_of_zero_freq_bands.(sgnum, timereversal=has_tr, verbose=false)
-    nontopo_sb = nontopological_basis(sgnum, timereversal=has_tr)[1]
-
-    # determine the trivial, respectively fragile indices in nontopo_sb
-    BRS = bandreps(sgnum, timereversal=has_tr)
-    trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, BRS)
+    nontopo_sb, _  = nontopological_basis(F, BRS)
 
     # compute the unique symmetry vectors for each compatibility-constrained band solution
     nᵀs = unique!(sort(sum_symbases.(Ref(sb), cⁱs)))
 
-    # get assoc matrices; to avoid recreating them multiple times in `calc_detailed_topology`
-    M         = matrix(sb)         # all bases
-    nontopo_M = matrix(nontopo_sb) # nontopological bases only
+    # determine the trivial, respectively fragile indices in nontopo_sb
+    trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, BRS)
     can_be_fragile = !isempty(fragile_idxs)
-    trivial_M = can_be_fragile ? (@views nontopo_M[:,trivial_idxs]) : nothing # trivial bases only (excl. fragile bases)
 
-    # stop early if this SG cannot host fragile phases fragile at all anyway
-    isempty(fragile_idxs) && continue
+    # stop early if this SG cannot host any phases fragile at all anyway
+    can_be_fragile || continue
 
     # compute topology of each solution
-    topos  = calc_detailed_topology.(nᵀs, Ref(nontopo_M), Ref(trivial_M), Ref(M))
+    topos  = calc_detailed_topology.(nᵀs, Ref(B), Ref(F))
 
     # --- print results as table ---
     println(io, "## SG ", sgnum, "\n\nνᵀ = ", νᵀ, "\n")

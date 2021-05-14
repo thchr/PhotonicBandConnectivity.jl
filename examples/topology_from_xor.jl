@@ -2,7 +2,6 @@ using PhotonicBandConnectivity
 using SymmetryBases
 using Test
 using Crystalline: matrix
-using Nemo
 
 #= 
 This is a test script to check the topology of the 2T solutions in the cases where the 2T 
@@ -32,7 +31,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
     if idx¹ᴸ !== nothing #&& classification(bandreps(sgnum, timereversal=has_tr)) ≠ "Z₁"
         sb, BRS = sbs[sgidx], BRSs[sgidx]
         B  = matrix(BRS, true)
-        Bℤ = MatrixSpace(ZZ, size(B)...)(B)
+        F  = smith(B)
         nᴸ = sb[idx¹ᴸ]
 
         # ---------------------------------------------------------------------------------
@@ -48,7 +47,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
         # find "Z₂" factor-type topology of each solution (this step can be a little slow 
         # for some of the SGs with many solutions/large M, because the optimization step 
         # is a bit slow)
-        topos = topology_from_2T1L_xor_1L.(ns, Ref(nᴸ), Ref(Bℤ))
+        topos = topology_from_2T1L_xor_1L.(ns, Ref(nᴸ), Ref(F))
 
         # get aggregated stats 
         trivial_countᵀ    = count(==(trivial),    topos)
