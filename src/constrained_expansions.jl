@@ -1,6 +1,6 @@
 """
-    find_symmetry_constrained_bases(sb::SymBasis, ms::AbstractVector{Int},
-                                    Γidxs::AbstractVector{Int})
+    find_symmetry_constrained_bases(sb::SymBasis, ms::AbstractVector{<:Integer},
+                                    Γidxs::AbstractVector{<:Integer})
 
 Return a vector of indices `idxs` into a Hilbert basis `sb::SymBasis` (a basis whose
 elements are Hilbert basis vectors), such that `sb[idx]` for each `idx ∈ idxs` has at
@@ -10,8 +10,8 @@ The correspondence between irrep labels in `ms` and theose in the vectors of `sb
 specified by `Γidxs`, such that the labels of `ms` equal the labels of `sb[i][Γidxs]` for
 each `i`.
 """
-function find_symmetry_constrained_bases(sb::SymBasis, ms::AbstractVector{Int},
-                                         Γidxs::AbstractVector{Int})
+function find_symmetry_constrained_bases(sb::SymBasis, ms::AbstractVector{<:Integer},
+                                         Γidxs::AbstractVector{<:Integer})
     ntidxsᴴ = Int[]
     for (idx, nᴴ) in enumerate(sb)
         if has_mutual_positive_elements((@view nᴴ[Γidxs]), ms)
@@ -146,13 +146,14 @@ function safetycheck²ᵀ(cⁱs, ν²ᵀᵗ, ms²ᵀ, νsᴴ, sb, Γidxs)
     Set(cⁱs) ≠ Set(cⁱs′) && throw("Did not obtain equivalent solution sets")
 end
 
-function isvalid_solution(cⁱ::Vector{Int}, νᵗ::Int, ms::Vector{Int}, sb::SymBasis, Γidxs)
+function isvalid_solution(cⁱ::AbstractVector{<:Integer}, νᵗ::Integer, 
+            ms::AbstractVector{<:Integer}, sb::SymBasis, Γidxs::AbstractVector{<:Integer})
     n = sum_symbases(sb, cⁱ)
     return all(n[Γidxs] .≥ ms) && n[end] == νᵗ
 end
 
 """
-    filling_constrained_expansions(νsᴴ::AbstractVector{<:Int}, νᵗ::Int)
+    filling_constrained_expansions(νsᴴ::AbstractVector{<:Integer}, νᵗ::Integer)
 
 Find all non-negative integer solutions ``{cᵢ}`` to the linear Diophantine equation
 
@@ -165,7 +166,7 @@ polytope defined by the above inhomogeneous equation.
 
 Optionally prints number of solutions, if the kwarg `verbose::Bool=false` is set to `true`.
 """
-function filling_constrained_expansions(νsᴴ::AbstractVector{Int}, νᵗ::Int; 
+function filling_constrained_expansions(νsᴴ::AbstractVector{<:Integer}, νᵗ::Integer; 
                                         verbose::Bool=false)
 
     νᵗ > 0 || throw(DomainError(νᵗ, "must be positive"))

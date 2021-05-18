@@ -13,7 +13,7 @@ function sum_symbases!(n, sb::SymBasis, idxs)
 end
 sum_symbases(sb::SymBasis, idxs) = sum_symbases!(similar(first(sb)), sb, idxs)
 
-function coef2idxs(c::AbstractVector{Int})
+function coef2idxs(c::AbstractVector{<:Integer})
     N = sum(c)
     cⁱ = Vector{Int}(undef, N)
     pos₁, pos₂, idx = 0, 0, 0
