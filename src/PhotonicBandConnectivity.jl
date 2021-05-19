@@ -1,17 +1,18 @@
 module PhotonicBandConnectivity
 
 using Crystalline
+using Crystalline: rotation
 using SymmetryBases
 using LinearAlgebra
 using DocStringExtensions
 
-using Crystalline: rotation
+export minimal_expansion_of_zero_freq_bands,
+    sum_symbases, sum_symbases!,
+    check_target_filling_regular1L,
+    topology_from_2T1L_xor_1L,
+    is_transverse_bandstruct
 
-
-export minimal_expansion_of_zero_freq_bands, sum_symbases, sum_symbases!,
-    check_target_filling_regular1L, topology_from_2T1L_xor_1L
-
-# ------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------- #
 
 include("planewave_symvals.jl")
 include("irreps_and_representations.jl")
@@ -20,9 +21,8 @@ include("constrained_expansions.jl")
 #include("src/legacy_constrained_expansions.jl")
 include("topology_as_2T1L_vs_1L_difference.jl")
 include("is_transverse_bandstruct.jl")
-export is_transverse_bandstruct
 
-# ------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------- #
 
 function minimal_expansion_of_zero_freq_bands(
             sgnum::Integer; 
@@ -205,7 +205,7 @@ function check_target_filling_regular1L(νᵗ, ms¹ᴸ, ms, νsᴴ, sb::SymBasis
     return cⁱs, νᵀ    # if no solutions were valid, `cⁱs` will be empty
 end
 
-# -----------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------- #
 # A simpler version of the above problem is to calculate the minimal connectivities in
 # a phononic or magnonic problem, where the 1L modes are real. Then we don't need to
 # subsequently factor out the 1L solutions - instead, we can work with the 1L+2L solely.
@@ -243,5 +243,4 @@ function minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands(sgnum, timereversal;
     throw("Found no valid expansions consistent with constraints")
 end
 
-# -----------------------------------------------------------------------------------------
 end # module

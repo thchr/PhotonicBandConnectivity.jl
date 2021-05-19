@@ -40,9 +40,9 @@ for sgnum in sgnums
     end
     println()
 
-    F        = smith(B)   # Smith normal decomposition of B
-    Nⁱʳʳ     = size(B, 1) # number of irreps plus 1 (filling)
-    sb, _    = compatibility_basis(F, BRS;)
+    F    = smith(B)   # Smith normal decomposition of B
+    Nⁱʳʳ = size(B, 1) # number of irreps plus 1 (filling)
+    sb   = compatibility_basis(F, BRS;)
     Γidxs    = PBC.get_Γidxs(lgirs_Γ, sb)   
     notΓidxs = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
 
@@ -67,7 +67,7 @@ for sgnum in sgnums
 
         μᵗ += 1
         cⁱs, μᵀ = check_target_filling_regular1L(μᵗ, ms¹ᴸ, ms, μsᴴ, sb, idx¹ᴸ, Γidxs, 
-                                                 notΓidxs; verbose=false, maxsols=nothing)
+                                                 notΓidxs; verbose=false)
         
         isempty(cⁱs) && continue # go to next μᵗ if no solutions found
 
@@ -104,7 +104,7 @@ for sgnum in sgnums
         filling_enforced = true
         for (idx, nᵀ) in enumerate(nᵀs)
             topos[idx] = topology_from_2T1L_xor_1L(nᵀ, nᴸ, ms²ᵀ, Γidxs, F)
-            topos[idx] == nontrivial || (filling_enforced = false; break)
+            topos[idx] == NONTRIVIAL || (filling_enforced = false; break)
         end
 
         if filling_enforced

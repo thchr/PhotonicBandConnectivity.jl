@@ -38,7 +38,7 @@ t₀           = time()
 
 repr²ᵀ = outputtype ∈ ("markdown", "unicode") ? "(▪)²ᵀ" : "(\\smallsquare)\\tT"
 
-    io ≠ stdout && println("SG $(sgnum)")
+io ≠ stdout && println("SG $(sgnum)")
 
 # -------------------------------------------------------------------------------------
 # PREP-WORK (IRREPS, HILBERT BASES, PINNED EIGENVALUES)

@@ -3,7 +3,7 @@ module WatanabeLuResults
 
 export Msᵂᴸ, M′sᵂᴸ
 
-# -----------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------- #
 # BOUNDS ON ω=0-CONNECTED (IRREGULAR) TRANSVERSE BANDS: M
 
 # M = 2 cases
@@ -61,7 +61,7 @@ connectivities).
 """
 const Msᵂᴸ = getindex.(sort(vcat(M2 .=> 2, M3 .=> 3, M4 .=> 4), by=first), 2)
 
-# -----------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------- #
 # BOUNDS ON BANDS NOT CONNECTED TO ω=0 (REGULAR) BANDS: M′
 
 # From Table S1 of Watanabe and Lu; minimum band fillings for ω≠0 bands

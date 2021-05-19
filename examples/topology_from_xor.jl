@@ -1,6 +1,7 @@
 using PhotonicBandConnectivity
 using SymmetryBases
 using Test
+using Crystalline
 using Crystalline: matrix
 
 #= 
@@ -28,13 +29,13 @@ for (sgidx, sgnum) in enumerate(sgnums)
     idx¹ᴸ = idx¹ᴸs[sgidx]
     
     # TODO: Treat the simpler `idx¹ᴸ !== nothing` case as well within this script?
-    if idx¹ᴸ !== nothing #&& classification(bandreps(sgnum, timereversal=has_tr)) ≠ "Z₁"
+    if idx¹ᴸ !== nothing && classification(BRSs[sgidx]) ≠ "Z₁"
         sb, BRS = sbs[sgidx], BRSs[sgidx]
         B  = matrix(BRS, true)
         F  = smith(B)
         nᴸ = sb[idx¹ᴸ]
 
-        # ---------------------------------------------------------------------------------
+        # -------------------------------------------------------------------------------- #
         # check topology of all T+L solutions using `topology_from_2T1L_xor_1L` from
         # src/topology_as_2T1L_vs_1L_difference.jl (xor difference of T+L and L topology)
 
@@ -50,8 +51,8 @@ for (sgidx, sgnum) in enumerate(sgnums)
         topos = topology_from_2T1L_xor_1L.(ns, Ref(nᴸ), Ref(F))
 
         # get aggregated stats 
-        trivial_countᵀ    = count(==(trivial),    topos)
-        nontrivial_countᵀ = count(==(nontrivial), topos)
+        trivial_countᵀ    = count(==(TRIVIAL),    topos)
+        nontrivial_countᵀ = count(==(NONTRIVIAL), topos)
 
         # print summary of transverse solutions' topology
         tdigs, ntdigs = ndigits(trivial_countᵀ), ndigits(nontrivial_countᵀ)

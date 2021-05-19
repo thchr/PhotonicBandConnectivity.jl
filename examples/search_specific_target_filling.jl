@@ -44,7 +44,7 @@ t₀           = time()
 repr²ᵀ = outputtype ∈ ("markdown", "unicode") ? "(▪)²ᵀ" : "(\\smallsquare)\\tT"
 
 for sgnum in sgnums
-    println(io, outputtype=="latex" ? "\\subsubsection*{SG $sgnum}\n" : "## SG $(sgnum)\n")
+    println(io, outputtype=="latex" ? "\\subsubsection*{Space group $sgnum}\n" : "## Space group $(sgnum)\n")
     io ≠ stdout && println("SG $(sgnum)")
 
     # -------------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ for sgnum in sgnums
 
                 contents = [nᵀs_str topos]
                 header   = ["nᵀ", "topology"]
-                if all(==(nontrivial), topos)
+                if all(==(NONTRIVIAL), topos)
                     println(io, "[Filling-enforced topology]\n")
                 end
             else

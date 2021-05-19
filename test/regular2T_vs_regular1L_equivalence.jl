@@ -9,11 +9,11 @@ using SymmetryBases
 using LinearAlgebra: det, tr
 using Test
 
-# -----------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------- #
 
 rotation_order(op::SymOperation{3}) = (W=rotation(op); rotation_order_3d(det(W), tr(W)))
 
-# -----------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------- #
 
 @testset "Equivalence of regular2T and regular1L approaches" begin 
     for timereversal in (true, false)
@@ -28,7 +28,7 @@ rotation_order(op::SymOperation{3}) = (W=rotation(op); rotation_order_3d(det(W),
             all(≥(0), find_representation²ᵀ(sgnum, timereversal=timereversal))
         end
 
-        # ---------------------------------------------------------------------------------
+        # -------------------------------------------------------------------------------- #
 
         for sgnum in sgnums
             # irreps at Γ and Hilbert basis

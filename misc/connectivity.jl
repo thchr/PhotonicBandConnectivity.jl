@@ -14,7 +14,7 @@ using LinearAlgebra: qr
           of the symmetry vectors extracted by PhotonicBandConnectivity
 =#
 
-# -----------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------- #
 # METHODS
 
 function is_compatible_kvec(kv::KVec, kv′::KVec, cntr::Char)
@@ -118,7 +118,7 @@ function connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
     return cgraph
 end
 
-# -----------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------- #
 # SCRIPTING
 
 timereversal = true;
