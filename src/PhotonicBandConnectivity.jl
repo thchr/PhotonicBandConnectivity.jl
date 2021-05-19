@@ -10,6 +10,7 @@ export minimal_expansion_of_zero_freq_bands,
     sum_symbases, sum_symbases!,
     check_target_filling_regular1L,
     topology_from_2T1L_xor_1L,
+    indicators_singular,
     is_transverse_bandstruct
 
 # ---------------------------------------------------------------------------------------- #

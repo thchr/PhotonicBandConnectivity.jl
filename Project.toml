@@ -1,7 +1,7 @@
 name = "PhotonicBandConnectivity"
 uuid = "d7bc101a-f969-4292-96d7-1ebdabfa903f"
 authors = ["Thomas Christensen <tchr@mit.edu>"]
-version = "0.2.2"
+version = "0.2.3"
 
 [deps]
 Crystalline = "ae5e2be0-a263-11e9-351e-f94dad1eb351"
@@ -10,7 +10,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SymmetryBases = "cb68ded9-7e8c-45d3-bc66-19b5867c0467"
 
 [compat]
-Crystalline = "0.3.6"
+Crystalline = "0.3.8"
 SymmetryBases = "0.3.0"
 julia = "1.5"
 
