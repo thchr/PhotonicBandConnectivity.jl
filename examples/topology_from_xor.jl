@@ -60,9 +60,32 @@ for (sgidx, sgnum) in enumerate(sgnums)
         println("   # trivial:    ", " "^(maxdigs-tdigs),  trivial_countᵀ)
         println("   # nontrivial: ", " "^(maxdigs-ntdigs), nontrivial_countᵀ)
         trivial_countᵀ == 0 && println("   ─── all-nontrivial solution ───")
-        println()
+        #println()
+        # NOTE: SGs 13, 48, 50, 68, 86 are interesting (all transverse ω=0 solutions nontrivial)
 
-        # NOTE: SGs 48, 50, 68, 86 are interesting (all transverse ω=0 solutions nontrivial)
+        # --- check topology via "index-difference" ---
+        indices′_and_Λ = indicators_singular.(ns, Ref(nᴸ), Ref(F))
+        indices′ = first.(indices′_and_Λ)
+        Λ = first(last.(indices′_and_Λ))
+
+        topos′ = ifelse.(iszero.(indices′), TRIVIAL, NONTRIVIAL)
+
+        # get aggregated stats 
+        trivial_countᵀ′    = count(==(TRIVIAL),    topos′)
+        nontrivial_countᵀ′ = count(==(NONTRIVIAL), topos′)
+
+        # print summary of transverse solutions' topology
+        tdigs′, ntdigs′ = ndigits(trivial_countᵀ′), ndigits(nontrivial_countᵀ′)
+        maxdigs′ = max(tdigs′, ntdigs′)
+        println("   # trivial:    ", " "^(maxdigs′-tdigs′),  trivial_countᵀ′)
+        println("   # nontrivial: ", " "^(maxdigs′-ntdigs′), nontrivial_countᵀ′)
+        trivial_countᵀ′ == 0 && println("   ─── all-nontrivial solution ───")
+        
+
+        topos ≠ topos′ && @info "Difference! Λ = $Λ"
+        topos ≠ topos′ && @info "Indices: " indices′
+        topos ≠ topos′ && trivial_countᵀ′ == 0 && @warn "Filling-enforced topology!"
+        println()
     end
 end
 

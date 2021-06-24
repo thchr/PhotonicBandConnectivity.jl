@@ -17,9 +17,9 @@ function table_config(type::String)
                 table_type = :longtable, 
                 longtable_footer = "\\emph{\\footnotesize\\ldots\\ continued on next page}")
     elseif type == "unicode"
-        return (crop = :none, tf = unicode, vlines = :none, hlines = [:begin, 1, :end])
+        return (crop = :none, tf = tf_unicode, vlines = :none, hlines = [:begin, 1, :end])
     elseif type == "markdown"
-        return (crop = :none, tf = markdown)
+        return (crop = :none, tf = tf_markdown)
     end
 end
 
@@ -120,13 +120,13 @@ while true
     # print tables for every "n"th order minimal solution
     if !isℤ₁
         # find "Z₂" factor-type topology of each solution
-        topos = topology_from_2T1L_xor_1L.(nᵀs, Ref(nᴸ), Ref(ms²ᵀ), Ref(Γidxs), Ref(F))
-
+        indices = getindex.(indicators_singular.(nᵀs, Ref(nᴸ), Ref(ms²ᵀ), Ref(Γidxs), Ref(F)), 1)
+        topos = ifelse.(all.(iszero, indices), TRIVIAL, NONTRIVIAL)
         io ≠ stdout && println("      ... computed associated xor-topology via EBRs")
 
-        contents = [nᵀs_str topos]
-        header   = ["nᵀ", "topology"]
-        if all(==(nontrivial), topos)
+        contents = [nᵀs_str topos indices]
+        header   = ["nᵀ", "topology", "indices"]
+        if all(==(NONTRIVIAL), topos)
             println(io, "[Filling-enforced topology]\n")
         end
     else
