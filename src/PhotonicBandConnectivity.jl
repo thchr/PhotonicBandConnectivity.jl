@@ -27,8 +27,8 @@ include("is_transverse_bandstruct.jl")
 
 function minimal_expansion_of_zero_freq_bands(
             sgnum::Integer; 
-            timereversal::Bool=true, verbose::Bool=true, shuffle_1Lpick::Bool=false,
-            allpaths::Bool=false
+            timereversal::Bool=true, verbose::Bool=false, shuffle_1Lpick::Bool=false,
+            allpaths::Bool=false, safetychecks::Bool=true
             )
 
     # Irreps at Γ, irrep-multiplicities of ω=0 2T bands, and symmetry operations
@@ -48,7 +48,7 @@ function minimal_expansion_of_zero_freq_bands(
         # the 2T branches. If that irrep is regular (i.e. has no negative coefficients), we
         # don't need to invoke 1L at all, and can solve for just 2T alone.
         r = find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ; 
-                                            safetychecks=true, verbose=verbose,
+                                            safetychecks=safetychecks, verbose=verbose,
                                             allpaths=allpaths)
         return r..., nothing
         
@@ -74,7 +74,7 @@ function minimal_expansion_of_zero_freq_bands(
 end
 
 function find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ; 
-                                         verbose::Bool=true, safetychecks::Bool=false,
+                                         verbose::Bool=false, safetychecks::Bool=false,
                                          allpaths::Bool=false)
     verbose && println("SG ", sgnum)
 
@@ -145,7 +145,7 @@ function find_minimum_bandreps_regular1L(sgnum, lgirs, timereversal, ms¹ᴸ, ms
         
     # find _all_ feasible solutions to ms constraints for fixed and minimal νᵗ; we use a 
     # recursive looping construct to find candidate expansions
-    max_patience_νᵗ = max(4*νᴴₘₐₓ, 8)
+    max_patience_νᵗ = max(4*νᴴₘₐₓ, 12)
     for νᵗ in (2+νᴸ):max_patience_νᵗ # target filling (≥2+νᴸ) (function returns from loop)
         verbose && print("   … νᵗ = ", νᵗ, ": ")
 
@@ -213,8 +213,9 @@ end
 # The function below implements this, returning the minimal connectivities in bosonic
 # systems where the longitudinal modes are real.
 
-function minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands(sgnum, timereversal;
-            verbose::Bool=false, allpaths::Bool=false, safetychecks::Bool=false)
+function minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands(sgnum::Integer;
+            timereversal::Bool=true, verbose::Bool=false, allpaths::Bool=false, 
+            safetychecks::Bool=false)
 
     # Irreps at Γ, irrep-multiplicities of ω=0 2T bands, and symmetry operations
     lgirs   = get_lgirreps(sgnum, Val(3))["Γ"]

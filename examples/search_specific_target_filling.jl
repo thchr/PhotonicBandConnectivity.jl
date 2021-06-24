@@ -58,9 +58,9 @@ for sgnum in sgnums
 
     # prep-work to get Hilbert bases etc
     BRS  = bandreps(sgnum, spinful=false, timereversal=timereversal)
-    B    = matrix(BRS, true) # Matrix with columns of EBRs.
-    F    = smith(B)          # Smith normal decomposition of B
-    Nⁱʳʳ = size(B, 1)        # number of irreps plus 1 (filling)
+    B    = matrix(BRS) # Matrix with columns of EBRs.
+    F    = smith(B)    # Smith normal decomposition of B
+    Nⁱʳʳ = size(B, 1)  # number of irreps plus 1 (filling)
     isℤ₁ = classification(BRS) == "Z₁"
       
     sb       = compatibility_basis(F, BRS)

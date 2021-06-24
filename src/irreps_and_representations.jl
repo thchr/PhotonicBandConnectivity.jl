@@ -1,5 +1,5 @@
 """
-    $(SIGNATURES)
+    $(TYPEDSIGNATURES)
 
 Get the compatibility basis `sb` associated with the `LGIrreps`s `lgirs` with or
 without time-reversal symmetry (set by `timereversal=true` or `false`, respectively),

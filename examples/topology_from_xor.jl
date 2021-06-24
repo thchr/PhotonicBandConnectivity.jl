@@ -31,7 +31,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
     # TODO: Treat the simpler `idx¹ᴸ !== nothing` case as well within this script?
     if idx¹ᴸ !== nothing && classification(BRSs[sgidx]) ≠ "Z₁"
         sb, BRS = sbs[sgidx], BRSs[sgidx]
-        B  = matrix(BRS, true)
+        B  = matrix(BRS)
         F  = smith(B)
         nᴸ = sb[idx¹ᴸ]
 

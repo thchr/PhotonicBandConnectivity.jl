@@ -40,6 +40,14 @@ calc_topology_singular = topology_from_2T1L_xor_1L
 
 # ---------------------------------------------------------------------------------------- #
 
+"""
+    indicators_singular(
+            nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer}, F::Smith)
+    --> Vector{Int}, AbstractVector{Int}
+
+Returns the indices and the nontrivial factors corresponding to `nᵀ⁺ᴸ`, `nᴸ`, and `F` for a
+zero-frequency (singular) solution.
+"""
 function indicators_singular(
             nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer}, F::Smith)
 
@@ -66,7 +74,7 @@ for f in (:topology_from_2T1L_xor_1L, :indicators_singular)
 
     @eval function $f(nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer},
                       BRS::BandRepSet)
-        B = matrix(BRS, true)   # ::Matrix{Int}
+        B = matrix(BRS)         # ::Matrix{Int}
         return $f(nᵀ⁺ᴸ, nᴸ, B)
     end
 

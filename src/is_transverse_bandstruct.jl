@@ -55,5 +55,5 @@ function is_transverse_bandstruct(
                                        allpaths=sb.allpaths)
             )
 
-    return is_transverse_bandstruct(nᵀ′, sb, lgirs, smith(matrix(brs, true)))
+    return is_transverse_bandstruct(nᵀ′, sb, lgirs, smith(matrix(brs)))
 end

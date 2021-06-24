@@ -22,7 +22,7 @@ topos   = Vector{Vector{TopologyKind}}(undef, length(sgnums))
 for (sgidx, sgnum) in enumerate(sgnums)
     print("SG ", sgnum, ":\t")
     
-    cⁱs, μ²ᵀ⁺¹ᴸs[sgidx], sb = minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands(sgnum, has_tr)
+    cⁱs, μ²ᵀ⁺¹ᴸs[sgidx], sb = minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands(sgnum; timereversal=has_tr)
     μs[sgidx] = minimum(fillings(sb)) # "default" fillings
     print("μ²ᵀ⁺¹ᴸ = ", μ²ᵀ⁺¹ᴸs[sgidx], " (μ = ", μs[sgidx], ")")
 
@@ -32,7 +32,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
 
     # get EBRs
     BRS = bandreps(sgnum, 3, timereversal=has_tr)
-    B   = matrix(BRS, true)
+    B   = matrix(BRS)
     F   = Crystalline.smith(B)
 
     # print symmetry-identifiable class of space group

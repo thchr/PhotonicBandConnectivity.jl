@@ -40,7 +40,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
 
     # band representations
     BRS = bandreps(sgnum, 3; timereversal=has_tr)
-    B   = matrix(BRS, true)
+    B   = matrix(BRS)
     F   = smith(B)
 
     # get Hilbert bases and minimal connectivities + symmetry vectors
