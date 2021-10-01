@@ -33,7 +33,7 @@ end
 # for each of the band-solution in `nᵀs`, check whether or not it can be expanded solely 
 # using the nontopological basis (then it is a trivial band-combination!); if not, it must
 # be a nontrivial band-combination; also check for fragile topology
-filepath = "/mnt/c/Dropbox (MIT)/Web/thchr.github.io/_assets/fragile_connectivity_tables.md"
+filepath = "/mnt/c/Dropbox (MIT)/Web/thchr.github.io/_assets/fragile_connectivity_tables.md" # specify output path
 io = open(filepath, "w+")
 for (sgidx, sgnum) in enumerate(sgnums)
     # --- analyze topology of minimal connectivities ---
