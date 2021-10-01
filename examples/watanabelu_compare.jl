@@ -1,6 +1,6 @@
 using PhotonicBandConnectivity
 using Test
-includet((@__DIR__)*"/../misc/watanabelu_results.jl") # loads Watanabe & Lu data (in `Msᵂᴸ`)
+include((@__DIR__)*"/../misc/watanabelu_results.jl") # loads Watanabe & Lu data (in `Msᵂᴸ`)
 using Main.WatanabeLuResults
 
 sgnums = 1:230

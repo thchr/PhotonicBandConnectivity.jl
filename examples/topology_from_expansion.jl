@@ -4,7 +4,7 @@ using Crystalline: rotation, rotation_order_3d,
 using PhotonicBandConnectivity
 using SymmetryBases
 using PrettyTables: pretty_table
-includet("text_utils.jl"); using Main.TextUtils
+include("text_utils.jl"); using Main.TextUtils
 
 #=  
     This file analyses the trivial/fragile/nontrivial topology of those spacegroups (68 in 

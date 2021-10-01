@@ -7,7 +7,7 @@ using Test
 
 const PBC = PhotonicBandConnectivity
 
-includet("text_utils.jl"); using Main.TextUtils
+include("text_utils.jl"); using Main.TextUtils
 
 #------------------------------------------------------------------------------------------
 # SETUP
