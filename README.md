@@ -52,15 +52,3 @@ See additional examples in the [examples folder](https://github.com/thchr/Photon
 If you find this package useful in your reseach, please cite our arXiv paper:
 
 - T. Christensen, H.C. Po, J.D. Joannopoulos, & M. Soljačić, *Location and topology of the fundamental gap in photonic crystals*, [arXiv:2106.10267 (2021)](https://arxiv.org/abs/2106.10267)
-
-In addition, please cite any works explicitly referenced in documentation for individual methods that you use.
-
-
-[ci-status-img]:   https://github.com/thchr/Crystalline.jl/workflows/CI/badge.svg
-[ci-status-url]:   https://github.com/thchr/Crystalline.jl/actions
-[docs-dev-img]:    https://img.shields.io/badge/docs-dev-blue.svg
-[docs-dev-url]:    https://thchr.github.io/Crystalline.jl/dev
-[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://thchr.github.io/Crystalline.jl/stable
-[coverage-img]:    https://codecov.io/gh/thchr/Crystalline.jl/branch/master/graph/badge.svg
-[coverage-url]:    https://codecov.io/gh/thchr/Crystalline.jl
