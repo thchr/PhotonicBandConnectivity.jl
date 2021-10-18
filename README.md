@@ -51,4 +51,4 @@ See additional examples in the [examples folder](https://github.com/thchr/Photon
 
 If you find this package useful in your reseach, please cite our arXiv paper:
 
-- T. Christensen, H.C. Po, J.D. Joannopoulos, & M. Soljačić, *Location and topology of the fundamental gap in photonic crystals*, [arXiv:2106.10267 (2021)](https://arxiv.org/abs/2106.10267)
+- T. Christensen, H.C. Po, J.D. Joannopoulos, & M. Soljačić, *Location and topology of the fundamental gap in photonic crystals*, [arXiv:2106.10267 (2021)](https://arxiv.org/abs/2106.10267).
