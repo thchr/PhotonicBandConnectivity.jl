@@ -9,8 +9,9 @@ using DocStringExtensions
 export minimal_expansion_of_zero_freq_bands,
     sum_symbases, sum_symbases!,
     check_target_filling_regular1L,
-    topology_from_2T1L_xor_1L,
+    calc_topology_singular,
     indicators_singular,
+    topology_from_2T1L_xor_1L, # deprecated; remove eventually
     is_transverse_bandstruct
 
 # ---------------------------------------------------------------------------------------- #

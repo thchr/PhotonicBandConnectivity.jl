@@ -1,5 +1,5 @@
 """
-    topology_from_2T1L_xor_1L(
+    calc_topology_singular(
             nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer}, 
             BRS_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
                                                                      -> ::TopologyKind
@@ -29,14 +29,13 @@ neither the ``T+L`` or ``L`` symmetry vectors in general are unique, their diffe
 (i.e. ``T``, up to singular ``Γ``-irrep content): and as is the difference of their
 topological indices.
 """
-function topology_from_2T1L_xor_1L(
+function calc_topology_singular(
             nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer}, F::Smith)
     inds, _ = indicators_singular(nᵀ⁺ᴸ, nᴸ, F)
 
     return all(iszero, inds) ? TRIVIAL : NONTRIVIAL
 end
-calc_topology_singular = topology_from_2T1L_xor_1L
-# TODO: deprecate/rm `topology_as_2T1L_vs_1L_difference` in favor of `calc_topology_singular`
+@deprecate topology_from_2T1L_xor_1L calc_topology_singular
 
 # ---------------------------------------------------------------------------------------- #
 
@@ -64,7 +63,7 @@ end
 # ---------------------------------------------------------------------------------------- #
 # CONVENIENCE ACCESSORS/WRAPPERS
 
-for f in (:topology_from_2T1L_xor_1L, :indicators_singular)
+for f in (:calc_topology_singular, :indicators_singular)
     # Basic wrappers
     @eval function $f(nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer},
                       B::AbstractMatrix{<:Integer})
