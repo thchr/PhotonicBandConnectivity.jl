@@ -36,7 +36,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
         nᴸ = sb[idx¹ᴸ]
 
         # -------------------------------------------------------------------------------- #
-        # check topology of all T+L solutions using `topology_from_2T1L_xor_1L` from
+        # check topology of all T+L solutions using `calc_topology_singular` from
         # src/topology_as_2T1L_vs_1L_difference.jl (xor difference of T+L and L topology)
 
         # find unique symmetry vectors
@@ -48,7 +48,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
         # find "Z₂" factor-type topology of each solution (this step can be a little slow 
         # for some of the SGs with many solutions/large M, because the optimization step 
         # is a bit slow)
-        topos = topology_from_2T1L_xor_1L.(ns, Ref(nᴸ), Ref(F))
+        topos = calc_topology_singular.(ns, Ref(nᴸ), Ref(F))
 
         # get aggregated stats 
         trivial_countᵀ    = count(==(TRIVIAL),    topos)

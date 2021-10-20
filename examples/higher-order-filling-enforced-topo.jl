@@ -103,7 +103,7 @@ for sgnum in sgnums
         topos = Vector{TopologyKind}(undef, length(nᵀs))
         filling_enforced = true
         for (idx, nᵀ) in enumerate(nᵀs)
-            topos[idx] = topology_from_2T1L_xor_1L(nᵀ, nᴸ, ms²ᵀ, Γidxs, F)
+            topos[idx] = calc_topology_singular(nᵀ, nᴸ, ms²ᵀ, Γidxs, F)
             topos[idx] == NONTRIVIAL || (filling_enforced = false; break)
         end
 
