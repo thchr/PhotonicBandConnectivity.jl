@@ -24,7 +24,7 @@ for sgnum in sgnums
     # -------------------------------------------------------------------------------------
     # PREP-WORK (IRREPS, HILBERT BASES, PINNED EIGENVALUES)
 
-    lgirsd = get_lgirreps(sgnum, Val(3))
+    lgirsd = lgirreps(sgnum, Val(3))
     timereversal && (foreach(zip(keys(lgirsd), values(lgirsd))) do (klab, lgirs)
                         lgirsd[klab] = realify(lgirs)
                      end)

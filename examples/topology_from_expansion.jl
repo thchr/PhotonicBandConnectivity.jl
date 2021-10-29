@@ -70,7 +70,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
     # construct human-readable symmetry vectors, with the ω=0-connected Γ-irreps highlighted
 
     # irreps at Γ
-    lgirs_Γ = get_lgirreps(sgnum, Val(3))["Γ"]
+    lgirs_Γ = lgirreps(sgnum, Val(3))["Γ"]
     has_tr && (lgirs_Γ = realify(lgirs_Γ))
     irlabs_Γ = formatirreplabel.(getfield.(lgirs_Γ, :cdml))
     Γidxs = PhotonicBandConnectivity.get_Γidxs(lgirs_Γ, sb) # mapping between sb and lgirs_Γ

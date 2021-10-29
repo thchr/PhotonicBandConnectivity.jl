@@ -5,7 +5,7 @@ using Test
 @testset "Pinned irreps for 2T, 1L, and 2T+1L" begin 
     for sgnum in 1:230
         for timereversal in (true, false)
-            lgirs = get_lgirreps(sgnum, Val(3))["Γ"]
+            lgirs = lgirreps(sgnum, Val(3))["Γ"]
             timereversal && (lgirs = realify(lgirs))
 
             # pinned irreps at (Γ,ω=0)

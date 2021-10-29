@@ -10,7 +10,7 @@ photonic bands connected to zero-frequency.
   exclude the symmetry data of the singular ω=0 modes at Γ (e.g., if `nᵀ′` is a 2-band
   symmetry vector, its Γ-projection should be empty).
 - `sb`: a compatibility Hilbert basis (see `compatibility_basis` in SymmetryBases).
-- `lgirs`: a vector of `LGIrrep`s at Γ (see `get_lgirreps` in Crystalline).
+- `lgirs`: a vector of `LGIrrep`s at Γ (see `lgirreps` in Crystalline).
 - `F` or `BRS`: the elementary band representations, provided either as a `BandRepSet` or as
   the Smith decomposition of its matrix form. Can be omitted (incurring then a slight extra
   cost).

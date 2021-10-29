@@ -18,7 +18,7 @@ function compatibility_basis_and_Γidxs(lgirs::AbstractVector{LGIrrep{D}};
     # map to the corresponding irrep indices in `lgirs`.
     # TODO: note that the irrep-sorting in sb and lgirs is not always the same (e.g. in ±
     #       irreps), so we are not guaranteed that Γidxs is a simple range (e.g., it could 
-    #       be [1,3,5,2,4,6]). We really ought to align the irreps sorting in `get_lgirreps`
+    #       be [1,3,5,2,4,6]). We really ought to align the irreps sorting in `lgirreps`
     #       versus `bandreps` (BRS) and `compatibility_basis` (sb).
     Γidxs = get_Γidxs(lgirs, sb)
 
@@ -65,7 +65,7 @@ for postfix in ("²ᵀ⁺¹ᴸ", "¹ᴸ", "²ᵀ")
 
     # convenience accessors via 
     @eval function $f(sgnum::Integer; timereversal::Bool=true)
-        lgirs = get_lgirreps(sgnum, Val(3))["Γ"]
+        lgirs = lgirreps(sgnum, Val(3))["Γ"]
         timereversal && (lgirs = realify(lgirs))
 
         return $f(lgirs)

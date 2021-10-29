@@ -32,7 +32,7 @@ rotation_order(op::SymOperation{3}) = (W=rotation(op); rotation_order_3d(det(W),
 
         for sgnum in sgnums
             # irreps at Γ and Hilbert basis
-            lgirs = get_lgirreps(sgnum, Val(3))["Γ"]
+            lgirs = lgirreps(sgnum, Val(3))["Γ"]
             timereversal && (lgirs = realify(lgirs))
             
             # pinned irreps at (Γ,ω=0)

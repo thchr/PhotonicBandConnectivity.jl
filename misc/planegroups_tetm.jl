@@ -34,7 +34,7 @@ function minimal_expansion_planegroup(sgnum::Integer, timereversal::Bool, polari
             verbose::Bool=false, allpaths::Bool=false, safetychecks::Bool=false)
 
     # Irreps at Γ
-    lgirs = get_lgirreps(sgnum, Val(2))["Γ"]
+    lgirs = lgirreps(sgnum, Val(2))["Γ"]
     timereversal && (lgirs = realify(lgirs))
 
     # Hilbert bases and "default" connectivities
@@ -62,7 +62,7 @@ for pgnum in 1:17
     local lgirs
     sgnum = PLANE2SPACE_NUM[pgnum]
     
-    lgirs = get_lgirreps(pgnum, Val(2))["Γ"]
+    lgirs = lgirreps(pgnum, Val(2))["Γ"]
     timereversal && (lgirs = realify(lgirs))
     irlabs = Crystalline.formatirreplabel.(label.(lgirs))
     lg = group(first(lgirs))
