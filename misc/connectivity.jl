@@ -17,7 +17,7 @@ using LinearAlgebra: qr
 # ---------------------------------------------------------------------------------------- #
 # METHODS
 
-function is_compatible_kvec(kv::KVec, kv′::KVec, cntr::Char)
+function is_compatible(kv::KVec, kv′::KVec, cntr::Char)
     # This method determines whether there is a solution to 
     #   kv + G = kv′(αβγ′)
     # and if so, returns G and αβγ′. kv must be special and kv′ should be nonspecial
@@ -49,7 +49,7 @@ function is_compatible_kvec(kv::KVec, kv′::KVec, cntr::Char)
     return false, nothing, nothing
 end
 
-function find_compatible_kvec(kv::KVec, kvs′::Vector{KVec}, cntr::Char)
+function find_compatible(kv::KVec, kvs′::Vector{KVec}, cntr::Char)
     !isspecial(kv) && throw(DomainError(kv, "input kv must be a special k-point"))
 
     compat_idxs = Vector{Int64}()
@@ -57,7 +57,7 @@ function find_compatible_kvec(kv::KVec, kvs′::Vector{KVec}, cntr::Char)
     compat_Gs   = Vector{Vector{Int}}()
     @inbounds for (idx′, kv′) in enumerate(kvs′)
         isspecial(kv′) && continue # must be a line/plane/general point to match a special point kv
-        compat_bool, αβγ′,G = is_compatible_kvec(kv, kv′, cntr)
+        compat_bool, αβγ′,G = is_compatible(kv, kv′, cntr)
         if compat_bool
             push!(compat_idxs, idx′)
             push!(compat_αβγs, αβγ′)
@@ -83,8 +83,8 @@ function connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
     compat_Gs = Vector{Vector{Vector{Int}}}(undef, Nkᴬ)
     cgraph = MetaGraph(Nkᴬ) # connectivity graph for special k-vecs
     for (idxᴬ, (kvᴬ, klabᴬ)) in enumerate(zip(kvsᴬ, klabsᴬ))
-        compat_idxs[idxᴬ], compat_αβγs[idxᴬ], compat_Gs[idxᴬ] = find_compatible_kvec(kvᴬ, kvsᴮ, cntr)
-        set_props!(cgraph, idxᴬ, Dict(:kvec=>kvᴬ, :klab=>klabᴬ))  # TODO: Add idx of kvᴬ in kvsᴮ?
+        compat_idxs[idxᴬ], compat_αβγs[idxᴬ], compat_Gs[idxᴬ] = find_compatible(kvᴬ, kvsᴮ, cntr)
+        set_props!(cgraph, idxᴬ, Dict(:kv=>kvᴬ, :klab=>klabᴬ))  # TODO: Add idx of kvᴬ in kvsᴮ?
     end
 
     for (idxᴬ¹, kvᴬ¹) in enumerate(kvsᴬ)
@@ -109,7 +109,7 @@ function connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
             add_edge!(cgraph, idxᴬ¹, idxᴬ²)
             set_props!(cgraph, Edge(idxᴬ¹, idxᴬ²), 
                 Dict(:klabs=>getindex.(Ref(klabsᴮ), idxsᴮ), 
-                     :kvecs=>getindex.(Ref(kvsᴮ), idxsᴮ), 
+                     :kvs=>getindex.(Ref(kvsᴮ), idxsᴮ), 
                      :kidxs=>idxsᴮ)
                )
         end
@@ -129,6 +129,6 @@ if timereversal
     foreach((klab, lgirs)->(lgirsd[klab] = realify(lgirs)), zip(keys(lgirsd), values(lgirsd)))
 end
 kvsᴬ, klabsᴬ = sb.kvs, sb.klabs;
-kvsᴮ, klabsᴮ = kvec.(first.(values(lgirsd))), klabel.(first.(values(lgirsd)));
+kvsᴮ, klabsᴮ = position.(first.(values(lgirsd))), klabel.(first.(values(lgirsd)));
 cntr = centering(sgnum);
 cg = connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr);

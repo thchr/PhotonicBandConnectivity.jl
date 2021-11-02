@@ -10,8 +10,8 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SymmetryBases = "cb68ded9-7e8c-45d3-bc66-19b5867c0467"
 
 [compat]
-Crystalline = "0.4.1"
-SymmetryBases = "0.3.1"
+Crystalline = "0.4.12"
+SymmetryBases = "0.3.3"
 julia = "1.5"
 
 [extras]
