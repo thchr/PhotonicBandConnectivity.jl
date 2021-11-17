@@ -9,7 +9,7 @@ function get_symvals²ᵀ⁺¹ᴸ(ops::AbstractVector{SymOperation{3}})
         n = abs(rotval)
         # This covers every case, including rotations, mirrors, rotoinversions, & inversion
         θ = 2π/n
-        symvals[i] = sign(rotval)* (cis(θ) + cis(-θ) + one(ComplexF64))
+        symvals[i] = sign(rotval) * (cis(θ) + cis(-θ) + one(ComplexF64))
     end
     
     return symvals

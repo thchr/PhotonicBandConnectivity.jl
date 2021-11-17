@@ -56,7 +56,7 @@ for postfix in ("²ᵀ⁺¹ᴸ", "¹ᴸ", "²ᵀ")
     symvals_fun = Symbol("get_symvals"*postfix)
 
     # "root" accessors via lgirs
-    @eval function $f(lgirs::AbstractVector{LGIrrep{3}})
+    @eval function $f(lgirs::AbstractVector{<:Crystalline.AbstractIrrep{3}})
         lg = group(first(lgirs))
         symvals = $symvals_fun(lg)
 
