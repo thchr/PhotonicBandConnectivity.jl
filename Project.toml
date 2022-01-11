@@ -11,7 +11,7 @@ SymmetryBases = "cb68ded9-7e8c-45d3-bc66-19b5867c0467"
 
 [compat]
 Crystalline = "0.4.12"
-SymmetryBases = "0.3.4"
+SymmetryBases = "0.4"
 julia = "1.6"
 
 [extras]
