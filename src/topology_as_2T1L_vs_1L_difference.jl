@@ -21,7 +21,7 @@ symmetry vector `nᴸ` - is topologically trivial or nontrivial from a symmetry 
 - a member of the enum `SymBases.TopologyKind`, either `TRIVIAL = 0` or `NONTRIVIAL = 1`.
 
 # Implementation
-A transverse, singular band is trivial if [`indicators_singular`[@ref] returns a trivial set
+A transverse, singular band is trivial if [`indicators_singular`](@ref) returns a trivial set
 of topological indices ``ν``, i.e., if ``νᵢ = 0`` for all ``i``. Otherwise, it is stably
 nontrivial.
 The indices computed from `indicators_singular` are well-defined and robust, because while
