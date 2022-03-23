@@ -27,7 +27,7 @@ end
 
 function get_Γidxs(lgirs::AbstractVector{<:LGIrrep}, sb_or_brs::Union{BandRepSet, SymBasis})
     irlabs_sb_or_brs = irreplabels(sb_or_brs)
-    irlabs_lgirs = Crystalline.formatirreplabel.(label.(lgirs))
+    irlabs_lgirs = label.(lgirs)
     Γidxs = map(irlab->findfirst(==(irlab), irlabs_sb_or_brs), irlabs_lgirs)
 
     return Γidxs

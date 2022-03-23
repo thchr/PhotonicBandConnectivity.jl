@@ -64,7 +64,7 @@ for pgnum in 1:17
     
     lgirs = lgirreps(pgnum, Val(2))["Γ"]
     timereversal && (lgirs = realify(lgirs))
-    irlabs = Crystalline.formatirreplabel.(label.(lgirs))
+    irlabs = label.(lgirs)
     lg = group(first(lgirs))
 
     msᵀᴱ = find_representationᵀᴱᵀᴹ(lgirs, :TE)

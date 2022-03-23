@@ -1,6 +1,6 @@
 using Crystalline, LinearAlgebra, Test
 using Crystalline: rotation, rotation_order_3d,
-                   prettyprint_symmetryvector, formatirreplabel
+                   prettyprint_symmetryvector
 using PhotonicBandConnectivity
 using SymmetryBases
 using PrettyTables: pretty_table
@@ -72,7 +72,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
     # irreps at Γ
     lgirs_Γ = lgirreps(sgnum, Val(3))["Γ"]
     has_tr && (lgirs_Γ = realify(lgirs_Γ))
-    irlabs_Γ = formatirreplabel.(getfield.(lgirs_Γ, :cdml))
+    irlabs_Γ = label.(lgirs_Γ)
     Γidxs = PhotonicBandConnectivity.get_Γidxs(lgirs_Γ, sb) # mapping between sb and lgirs_Γ
 
     # string-representation of ω=0 Γ-irreps (in `ms²ᵀ`)
