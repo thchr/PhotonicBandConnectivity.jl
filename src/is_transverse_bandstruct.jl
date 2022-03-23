@@ -19,7 +19,7 @@ function is_transverse_bandstruct(
             nᵀ′::Vector{<:Integer},
             sb::SymBasis,
             lgirs::AbstractVector{LGIrrep{3}},
-            F::Smith, # Smith decomposition of EBR matrix
+            F::Smith # Smith decomposition of EBR matrix
             )
 
     sb.compatbasis || error(DomainError(sb, "`sb` must be a basis for {BS}"))
@@ -31,13 +31,14 @@ function is_transverse_bandstruct(
     Γidxs    = get_Γidxs(lgirs, sb)
     ntidxs¹ᴸ = find_symmetry_constrained_bases(sb, nΓ¹ᴸ, Γidxs)
     pick¹ᴸ   = argmin(fillings(sb)[ntidxs¹ᴸ])
-    nᴸ       = sb[pick¹ᴸ]
+    idx¹ᴸ    = ntidxs¹ᴸ[pick¹ᴸ]
+    nᴸ       = sb[idx¹ᴸ]
     
     # we assume that `nᵀ′` refers to a transverse state _without_ the ω=0 irrep data at Γ,
     # so now we add back in the "surrogate" choice for Γ-irrep for the ω=0 modes
     nᵀ = copy(nᵀ′)
     nᵀ[Γidxs] .+= nΓ²ᵀ
-    # then we build a possible regular band, by adding a longitudinal mode (that is fulfils
+    # then we build a possible regular band, by adding a longitudinal mode (that fulfills
     # the constraints on longitudinal modes at Γ)
     n = nᵀ + nᴸ
 

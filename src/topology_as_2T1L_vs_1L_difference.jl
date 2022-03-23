@@ -125,7 +125,8 @@ for f in (:calc_topology_singular, :indicators_singular)
         Γidxs    = get_Γidxs(lgirs, sb)
         ntidxs¹ᴸ = find_symmetry_constrained_bases(sb, nΓ¹ᴸ, Γidxs)
         pick¹ᴸ   = argmin(fillings(sb)[ntidxs¹ᴸ])
-        nᴸ       = sb[pick¹ᴸ]
+        idx¹ᴸ    = ntidxs¹ᴸ[pick¹ᴸ]
+        nᴸ       = sb[idx¹ᴸ]
 
         return $f(nᵀ, nᴸ, nΓ²ᵀ, Γidxs, BRS_B_F)
     end
