@@ -1,6 +1,7 @@
 using Crystalline
 using Graphs, MetaGraphs
-using LinearAlgebra: qr
+using LinearAlgebra: pinv
+using StaticArrays
 
 #=
     Many of the methods in this file are generalizations of similar very similar methods in
@@ -20,45 +21,39 @@ using LinearAlgebra: qr
 function is_compatible(kv::KVec{D}, kv′::KVec{D}, cntr::Char) where D
     # This method determines whether there is a solution to 
     #   kv + G = kv′(αβγ′)
-    # and if so, returns G and αβγ′. kv must be special and kv′ should be nonspecial
+    # and if so, returns G and αβγ′; otherwise, returns `nothing`. `kv` must be special.
+    isspecial(kv′) && return nothing # must have a free parameter to match a special point `kv`
     isspecial(kv) || throw(DomainError(kv, "must be special"))
-    isspecial(kv′) && return false, nothing, nothing
 
     k₀, _      = parts(primitivize(kv,  cntr)) 
     k₀′, kabc′ = parts(primitivize(kv′, cntr))
 
-    # least squares solve via QR factorization; equivalent to pinv(kabc)*(k₀-k₀′) but faster
-    QR_kabc′ = qr(Matrix(kabc′), Val(true)) # TODO: bug in StaticArrays' QR code requires the `Matrix` cast...
-    k₀G = similar(k₀)
-    Gspan = (0,-1,1)
-    for Gx in Gspan # TODO: generalize to allow 2D
-        for Gy in Gspan
-            for Gz in Gspan
-                k₀G .= (k₀[1]+Gx, k₀[2]+Gy, k₀[3]+Gz)
-                αβγ′ = QR_kabc′\(k₀G-k₀′)
-                k′ = k₀′ + kabc′*αβγ′
-                # check if least squares solution actually is a solution
-                compat_bool = isapprox(k₀G, k′, atol=Crystalline.DEFAULT_ATOL)
-                if compat_bool
-                    return compat_bool, αβγ′, [Gx,Gy,Gz]
-                end
-            end
+    # check if there's a solution of `kabc′*αβγ′ = k₀ - k₀′` modulo `G` in `αβγ′`
+    for Gtup in Iterators.product(ntuple(Returns((0,1,-1)), Val(D))...) # modulo G checks...
+        G = SVector{D,Int}(Gtup)
+        k₀G = k₀ + G
+        αβγ′ = SVector{D,Float64}(pinv(kabc′)*(k₀G-k₀′)) # least squares solution (recast to SVector cf. https://github.com/JuliaArrays/StaticArrays.jl/pull/873)
+        k′ = k₀′ + kabc′*αβγ′
+        # check if least squares solution actually is a solution
+        compat_bool = isapprox(k₀G, k′, atol=Crystalline.DEFAULT_ATOL)
+        if compat_bool
+            return αβγ′, G
         end
     end
 
-    return false, nothing, nothing
+    return nothing
 end
 
 function find_compatible(kv::KVec{D}, kvs′::AbstractVector{KVec{D}}, cntr::Char) where D
     !isspecial(kv) && throw(DomainError(kv, "input kv must be a special k-point"))
 
-    compat_idxs = Vector{Int64}()
-    compat_αβγs = Vector{Vector{Float64}}()
-    compat_Gs   = Vector{Vector{Int}}()
+    compat_idxs = Int64[]
+    compat_αβγs = SVector{D,Float64}[]
+    compat_Gs   = SVector{D,Int}[]
     @inbounds for (idx′, kv′) in enumerate(kvs′)
-        isspecial(kv′) && continue # must be a line/plane/general point to match a special point kv
-        compat_bool, αβγ′,G = is_compatible(kv, kv′, cntr)
-        if compat_bool
+        αβγ′_and_G = is_compatible(kv, kv′, cntr)
+        if !isnothing(αβγ′_and_G)
+            αβγ′, G = αβγ′_and_G
             push!(compat_idxs, idx′)
             push!(compat_αβγs, αβγ′)
             push!(compat_Gs, G)
@@ -79,12 +74,12 @@ function connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
 
     # find compatible vectors between A and B
     compat_idxs = Vector{Vector{Int}}(undef, Nkᴬ)
-    compat_αβγs = Vector{Vector{Vector{Float64}}}(undef, Nkᴬ)
-    compat_Gs = Vector{Vector{Vector{Int}}}(undef, Nkᴬ)
+    compat_αβγs = Vector{Vector{SVector{D,Float64}}}(undef, Nkᴬ)
+    compat_Gs = Vector{Vector{SVector{D,Int}}}(undef, Nkᴬ)
     cgraph = MetaGraph(Nkᴬ) # connectivity graph for special k-vecs
     for (idxᴬ, (kvᴬ, klabᴬ)) in enumerate(zip(kvsᴬ, klabsᴬ))
         compat_idxs[idxᴬ], compat_αβγs[idxᴬ], compat_Gs[idxᴬ] = find_compatible(kvᴬ, kvsᴮ, cntr)
-        set_props!(cgraph, idxᴬ, Dict(:kv=>kvᴬ, :klab=>klabᴬ))  # TODO: Add idx of kvᴬ in kvsᴮ?
+        set_props!(cgraph, idxᴬ, Dict(:kv => kvᴬ, :klab => klabᴬ)) # TODO: add idx of kvᴬ in kvsᴮ?
     end
 
     for (idxᴬ¹, kvᴬ¹) in enumerate(kvsᴬ)
@@ -108,9 +103,9 @@ function connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
             end
             add_edge!(cgraph, idxᴬ¹, idxᴬ²)
             set_props!(cgraph, Edge(idxᴬ¹, idxᴬ²), 
-                Dict(:klabs=>getindex.(Ref(klabsᴮ), idxsᴮ), 
-                     :kvs=>getindex.(Ref(kvsᴮ), idxsᴮ), 
-                     :kidxs=>idxsᴮ)
+                Dict(:klabs => getindex.(Ref(klabsᴮ), idxsᴮ),
+                     :kvs   => getindex.(Ref(kvsᴮ), idxsᴮ),
+                     :kidxs => idxsᴮ)
                )
         end
     end
@@ -120,15 +115,17 @@ end
 
 # ---------------------------------------------------------------------------------------- #
 # SCRIPTING
-
-timereversal = true;
-sgnum = 230;
-sb = compatibility_basis(sgnum, 3)[1];
-lgirsd = lgirreps(sgnum, Val(3));
+timereversal = true
+sgnum = 230
+brs = bandreps(sgnum, 3; timereversal)
+lgirsd = lgirreps(sgnum, Val(3))
 if timereversal
     lgirsd = Dict(klab => realify(lgirs) for (klab, lgirs) in lgirsd)
 end
-kvsᴬ, klabsᴬ = sb.kvs, sb.klabs;
-kvsᴮ, klabsᴮ = position.(first.(values(lgirsd))), klabel.(first.(values(lgirsd)));
-cntr = centering(sgnum);
+kvsᴬ, klabsᴬ = brs.kvs, brs.klabs
+kvsᴮ, klabsᴮ = position.(first.(values(lgirsd))), klabel.(first.(values(lgirsd)))
+cntr = centering(sgnum)
 cg = connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
+
+# ---------------------------------------------------------------------------------------- #
+# PLOT GRAPH
