@@ -1,5 +1,5 @@
 using Crystalline
-using LightGraphs, MetaGraphs
+using Graphs, MetaGraphs
 using LinearAlgebra: qr
 
 #=
@@ -7,7 +7,7 @@ using LinearAlgebra: qr
     Crystalline/src/compatibility.jl.
     The purpose of this file is to allow methods to give an indication of the connectedness
     between high-symmetry points in the Brillouin zone, and how they are connected. 
-    
+    j
     TODO: These methods should probably eventually be merged with the functionality in 
           Crystalline/src/compatibility.jl. At present, it is just easier to have it 
           separated, because the use-case here is quite specific to analyzing the validity
@@ -17,7 +17,7 @@ using LinearAlgebra: qr
 # ---------------------------------------------------------------------------------------- #
 # METHODS
 
-function is_compatible(kv::KVec, kv′::KVec, cntr::Char)
+function is_compatible(kv::KVec{D}, kv′::KVec{D}, cntr::Char) where D
     # This method determines whether there is a solution to 
     #   kv + G = kv′(αβγ′)
     # and if so, returns G and αβγ′. kv must be special and kv′ should be nonspecial
@@ -28,10 +28,10 @@ function is_compatible(kv::KVec, kv′::KVec, cntr::Char)
     k₀′, kabc′ = parts(primitivize(kv′, cntr))
 
     # least squares solve via QR factorization; equivalent to pinv(kabc)*(k₀-k₀′) but faster
-    QR_kabc′ = qr(kabc′, Val(true))
+    QR_kabc′ = qr(Matrix(kabc′), Val(true)) # TODO: bug in StaticArrays' QR code requires the `Matrix` cast...
     k₀G = similar(k₀)
     Gspan = (0,-1,1)
-    for Gx in Gspan
+    for Gx in Gspan # TODO: generalize to allow 2D
         for Gy in Gspan
             for Gz in Gspan
                 k₀G .= (k₀[1]+Gx, k₀[2]+Gy, k₀[3]+Gz)
@@ -49,7 +49,7 @@ function is_compatible(kv::KVec, kv′::KVec, cntr::Char)
     return false, nothing, nothing
 end
 
-function find_compatible(kv::KVec, kvs′::Vector{KVec}, cntr::Char)
+function find_compatible(kv::KVec{D}, kvs′::AbstractVector{KVec{D}}, cntr::Char) where D
     !isspecial(kv) && throw(DomainError(kv, "input kv must be a special k-point"))
 
     compat_idxs = Vector{Int64}()
@@ -126,9 +126,9 @@ sgnum = 230;
 sb = compatibility_basis(sgnum, 3)[1];
 lgirsd = lgirreps(sgnum, Val(3));
 if timereversal
-    foreach((klab, lgirs)->(lgirsd[klab] = realify(lgirs)), zip(keys(lgirsd), values(lgirsd)))
+    lgirsd = Dict(klab => realify(lgirs) for (klab, lgirs) in lgirsd)
 end
 kvsᴬ, klabsᴬ = sb.kvs, sb.klabs;
 kvsᴮ, klabsᴮ = position.(first.(values(lgirsd))), klabel.(first.(values(lgirsd)));
 cntr = centering(sgnum);
-cg = connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr);
+cg = connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
