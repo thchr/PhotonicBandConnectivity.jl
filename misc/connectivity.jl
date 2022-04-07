@@ -113,7 +113,7 @@ function connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
     return cgraph
 end
 
-# ---------------------------------------------------------------------------------------- #
+## --------------------------------------------------------------------------------------- #
 # SCRIPTING
 timereversal = true
 sgnum = 230
@@ -129,3 +129,27 @@ cg = connectivity((kvsᴬ, klabsᴬ), (kvsᴮ, klabsᴮ), cntr)
 
 # ---------------------------------------------------------------------------------------- #
 # PLOT GRAPH
+using Plots, GraphRecipes, NetworkLayout
+
+
+GraphRecipes.graphplot(cg;
+    names = Dict(k=>v[:klab] for (k,v) in cg.vprops),
+    edgelabel = Dict(Pair(e)=>join(v[:klabs],", ") for (e,v) in cg.eprops),
+    edgelabel_offset=.0,
+    nodeshape=:circle,
+    nodesize=0.15,
+    curvature_scale=.1,#curves=false,
+    method=:spring,
+    method_kw=Dict(:initialpos => [ones(2) for _ in cg.vprops])
+    )
+
+# ---------------------------------------------------------------------------------------- #
+# PLOT GRAPH
+#using GraphMakie, GLMakie
+#GraphMakie.graphplot(cg;
+#    nlabels = [cg.vprops[v][:klab] for v in 1:length(cg.vprops)],
+#    nlabels_align=(:center,:center),
+#    node_size=35,
+#    node_color=GLMakie.Colors.colorant"gray",
+#    elabels = [join(cg.eprops[e][:klabs], ", ") for e in edges(cg)]
+#    )
