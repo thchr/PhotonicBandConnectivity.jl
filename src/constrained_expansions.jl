@@ -2,16 +2,19 @@
     find_symmetry_constrained_bases(sb::SymBasis, ms::AbstractVector{<:Integer},
                                     Γidxs::AbstractVector{<:Integer})
 
-Return a vector of indices `idxs` into a Hilbert basis `sb::SymBasis` (a basis whose
-elements are Hilbert basis vectors), such that `sb[idx]` for each `idx ∈ idxs` has at
-least one positive element in overlap with a set of irrep multiplicities `ms`.
+Return a vector of indices `idxs` into a Hilbert basis or BandRepSet `sb` (a basis whose
+elements are non-negative symmetry vectors), such that `sb[idx]` for each `idx ∈ idxs` has
+at least one positive element in overlap with a set of irrep multiplicities `ms`.
 
 The correspondence between irrep labels in `ms` and theose in the vectors of `sb`, is
 specified by `Γidxs`, such that the labels of `ms` equal the labels of `sb[i][Γidxs]` for
 each `i`.
 """
-function find_symmetry_constrained_bases(sb::SymBasis, ms::AbstractVector{<:Integer},
-                                         Γidxs::AbstractVector{<:Integer})
+function find_symmetry_constrained_bases(
+        sb::Union{SymBasis, BandRepSet},
+        ms::AbstractVector{<:Integer},
+        Γidxs::AbstractVector{<:Integer}
+    )
     ntidxsᴴ = Int[]
     for (idx, nᴴ) in enumerate(sb)
         if has_mutual_positive_elements((@view nᴴ[Γidxs]), ms)
@@ -30,10 +33,15 @@ function add_solution!(cⁱs::Vector{Vector{Int}}, ijks::NTuple{N, Int}) where N
 end
 
 """
-    filling_symmetry_constrained_expansions(νᵗ::Integer, ms::AbstractVector{<:Integer}, νsᴴ,
-                                            sb::SymBasis, Γidxs;
-                                            ntidxs=eachindex(sb),
-                                            maxdepth=div(νᵗ, minimum(νsᴴ), RoundDown))
+    filling_symmetry_constrained_expansions(
+        νᵗ::Integer,
+        ms::AbstractVector{<:Integer},
+        νsᴴ,
+        sb::Union{SymBasis, BandRepSet},
+        Γidxs;
+        ntidxs = eachindex(sb),
+        maxdepth = div(νᵗ, minimum(νsᴴ), RoundDown)
+        )
 
 Given a compatibility basis `sb` with Hilbert bases ``[𝐧₁ᴴ, 𝐧₂ᴴ, ...]`` with associated
 fillings `vsᴴ` ``= [ν₁ᴴ, ν₂ᴴ, ...]``, find all expansions `cⁱs` that (a) satisfy the filling
@@ -65,10 +73,15 @@ that achieve the same goal by different means. They are retained, unloaded, in t
 despite being less capable or much slower, respectively, in the belief that they might more
 provide a simpler illustration of the conceptual approach.
 """
-function filling_symmetry_constrained_expansions(νᵗ::Integer, ms::AbstractVector{<:Integer},
-                                        νsᴴ, sb::SymBasis, Γidxs;
-                                        ntidxs=eachindex(sb),
-                                        maxdepth::Integer=div(νᵗ, minimum(νsᴴ), RoundDown))
+function filling_symmetry_constrained_expansions(
+        νᵗ::Integer,
+        ms::AbstractVector{<:Integer},
+        νsᴴ,
+        sb::Union{SymBasis, BandRepSet},
+        Γidxs;
+        ntidxs=eachindex(sb),
+        maxdepth::Integer=div(νᵗ, minimum(νsᴴ), RoundDown)
+    )
 
     νᵗ > 0 || throw(DomainError(νᵗ, "must be positive"))
 
@@ -78,7 +91,7 @@ function filling_symmetry_constrained_expansions(νᵗ::Integer, ms::AbstractVec
                                               1, length(ntidxs), 1, maxdepth, ntidxs)
 end
 function _filling_symmetry_constrained_expansions!(cⁱs, ms′, ijks, νᵗ, ms, νsᴴ, 
-                sb::SymBasis, Γidxs, startidx, stopidx, depth, maxdepth, ntidxs)
+                sb::Union{SymBasis, BandRepSet}, Γidxs, startidx, stopidx, depth, maxdepth, ntidxs)
     depth > maxdepth && return cⁱs
     for idxᵢ in startidx:stopidx
         i = ntidxs[idxᵢ]
@@ -114,7 +127,10 @@ function _sum_fillings(ijks::NTuple{N,Int}, νsᴴ) where N
 end
 
 # update Γ-constraints, assigning to ms′
-@inline function _update_symmetry_constraints!(ms′, ijks::NTuple{N,Int}, ms, sb::SymBasis, Γidxs) where N
+@inline function _update_symmetry_constraints!(
+        ms′, ijks::NTuple{N,Int}, ms, sb::Union{SymBasis, BandRepSet}, Γidxs
+    ) where N
+
     if N == 1
         i, = ijks
         @views ms′ .= ms .- sb[i][Γidxs]
@@ -177,7 +193,8 @@ function filling_constrained_expansions(νsᴴ::AbstractVector{<:Integer}, νᵗ
     # Specify linear Diophantine equation via PyNormaliz's Cone constructor
     inhom_eqs = reshape([@view νsᴴ[nt_idxs]; -νᵗ], 1, length(nt_idxs)+1)
     #inhom_eqs = reshape([νsᴴ; -νᵗ], 1, length(νsᴴ)+1)
-    P = PyNormaliz.Cone(inhom_equations = inhom_eqs, grading = ones(Int, 1, length(νsᴴ)))
+    P = SymmetryBases.PyNormaliz.Cone(
+            inhom_equations = inhom_eqs, grading = ones(Int, 1, length(nt_idxs)))
     # Find non-negative integer solutions to the above integral polytope
     normaliz_sols = P.LatticePoints() # distinct solutions across rows
 
