@@ -246,4 +246,11 @@ function minimal_expansion_of_zero_freq²ᵀ⁺¹ᴸ_bands(sgnum::Integer;
     throw("Found no valid expansions consistent with constraints")
 end
 
+# ---------------------------------------------------------------------------------------- #
+
+include("unpinned_gamma_irrep_solution_space.jl")
+export physical_zero_frequency_gamma_irreps, prettyprint_irrep_solspace
+
+# ---------------------------------------------------------------------------------------- #
+
 end # module
