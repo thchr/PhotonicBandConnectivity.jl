@@ -32,7 +32,7 @@ function is_compatible(kv::KVec{D}, kv′::KVec{D}, cntr::Char) where D
     for Gtup in Iterators.product(ntuple(Returns((0,1,-1)), Val(D))...) # modulo G checks...
         G = SVector{D,Int}(Gtup)
         k₀G = k₀ + G
-        αβγ′ = SVector{D,Float64}(pinv(kabc′)*(k₀G-k₀′)) # least squares solution (recast to SVector cf. https://github.com/JuliaArrays/StaticArrays.jl/pull/873)
+        αβγ′ = pinv(kabc′)*(k₀G-k₀′) # least squares solution
         k′ = k₀′ + kabc′*αβγ′
         # check if least squares solution actually is a solution
         compat_bool = isapprox(k₀G, k′, atol=Crystalline.DEFAULT_ATOL)
@@ -117,6 +117,7 @@ end
 # SCRIPTING
 timereversal = true
 sgnum = 230
+
 brs = bandreps(sgnum, 3; timereversal)
 lgirsd = lgirreps(sgnum, Val(3))
 if timereversal
