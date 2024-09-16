@@ -22,16 +22,16 @@ sbs    = getindex.(data, 3) # symmetry bases
 idx¹ᴸs = getindex.(data, 4) # index for chosen 1L branch
 
 # Band representations (to check trivial vs. nontrivial topology)
-BRSs = bandreps.(sgnums, timereversal=has_tr)
+brss = bandreps.(sgnums, timereversal=has_tr)
 
 # check whether 1L pick is trivial
 for (sgidx, sgnum) in enumerate(sgnums)
     idx¹ᴸ = idx¹ᴸs[sgidx]
     
     # TODO: Treat the simpler `idx¹ᴸ !== nothing` case as well within this script?
-    if idx¹ᴸ !== nothing && classification(BRSs[sgidx]) ≠ "Z₁"
-        sb, BRS = sbs[sgidx], BRSs[sgidx]
-        B  = matrix(BRS)
+    if idx¹ᴸ !== nothing && classification(brss[sgidx]) ≠ "Z₁"
+        sb, brs = sbs[sgidx], brss[sgidx]
+        B  = stack(brs)
         F  = smith(B)
         nᴸ = sb[idx¹ᴸ]
 

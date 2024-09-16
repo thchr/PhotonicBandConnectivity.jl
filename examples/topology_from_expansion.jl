@@ -39,19 +39,19 @@ for (sgidx, sgnum) in enumerate(sgnums)
     # --- analyze topology of minimal connectivities ---
 
     # band representations
-    BRS = bandreps(sgnum, 3; timereversal=has_tr)
-    B   = matrix(BRS)
+    brs = bandreps(sgnum, 3; timereversal=has_tr)
+    B   = stack(brs)
     F   = smith(B)
 
     # get Hilbert bases and minimal connectivities + symmetry vectors
     cⁱs, νᵀ, sb, _ = minimal_expansion_of_zero_freq_bands.(sgnum, timereversal=has_tr, verbose=false)
-    nontopo_sb, _  = nontopological_basis(F, BRS)
+    nontopo_sb, _  = nontopological_basis(F, brs)
 
     # compute the unique symmetry vectors for each compatibility-constrained band solution
     nᵀs = unique!(sort(sum_symbases.(Ref(sb), cⁱs)))
 
     # determine the trivial, respectively fragile indices in nontopo_sb
-    trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, BRS)
+    trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, brs)
     can_be_fragile = !isempty(fragile_idxs)
 
     # stop early if this SG cannot host any phases fragile at all anyway
@@ -64,7 +64,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
     println(io, "## SG ", sgnum, "\n\nνᵀ = ", νᵀ, "\n")
 
     # print global properties of the space group wrt. topology
-        #classification(BRS) ≠ "Z₁" && print(" [+NONTRIVIAL]")
+        #classification(brs) ≠ "Z₁" && print(" [+NONTRIVIAL]")
         #!isempty(fragile_idxs)     && print(" [+FRAGILE]")
 
     # construct human-readable symmetry vectors, with the ω=0-connected Γ-irreps highlighted

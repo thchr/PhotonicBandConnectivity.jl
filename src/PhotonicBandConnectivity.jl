@@ -86,7 +86,7 @@ function find_minimum_bandreps_regular2T(sgnum, lgirs, timereversal, ms²ᵀ;
     # We seek an expansion with coefficients cᵢ≥0 such that
     #   P(Γ) ∑ᵢ cᵢ 𝐧ᴴᵢ ≥ 𝐦(Γ)
     # where P(Γ) projects out the Γ-irreps from the Hilbert bases 𝐧ᴴᵢ. In code, letting
-    # `nsᴴ = matrix(sb)`, this means we seek a solution with `nsᴴ[Γidxs,:]*c ≥ ms`. 
+    # `nsᴴ = stack(sb)`, this means we seek a solution with `nsᴴ[Γidxs,:]*c ≥ ms`. 
     # Finally, we impose a filling
     # constraint, such that the overall number of bands is at most ν. In code, this requires
     # that `nsᴴ[end,:]*c == ν`. Moreover, all 𝐧ᴴᵢ that does not have at least one nonzero

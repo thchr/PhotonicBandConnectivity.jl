@@ -89,8 +89,8 @@ for pgnum in 1:17
     nsᵀᴹ_str = String.(take!.(iosᵀᴹ))
 
     # calculate topology
-    BRS = bandreps(pgnum, 2, timereversal=timereversal)
-    B   = matrix(BRS)
+    brs = bandreps(pgnum, 2, timereversal=timereversal)
+    B   = stack(brs)
     F   = Crystalline.smith(B)
 
     toposᵀᴱ = calc_detailed_topology.(nsᵀᴱ, Ref(B), Ref(F))

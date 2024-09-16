@@ -11,7 +11,7 @@ photonic bands connected to zero-frequency.
   symmetry vector, its Γ-projection should be empty).
 - `sb`: a compatibility Hilbert basis (see `compatibility_basis` in SymmetryBases).
 - `lgirs`: a vector of `LGIrrep`s at Γ (see `lgirreps` in Crystalline).
-- `F` or `BRS`: the elementary band representations, provided either as a `BandRepSet` or as
+- `F` or `brs`: the elementary band representations, provided either as a `BandRepSet` or as
   the Smith decomposition of its matrix form. Can be omitted (incurring then a slight extra
   cost).
 """
@@ -56,5 +56,5 @@ function is_transverse_bandstruct(
                                        allpaths=sb.allpaths)
             )
 
-    return is_transverse_bandstruct(nᵀ′, sb, lgirs, smith(matrix(brs)))
+    return is_transverse_bandstruct(nᵀ′, sb, lgirs, smith(stack(brs)))
 end

@@ -14,12 +14,12 @@ function compatibility_basis_and_Γidxs(lgirs::AbstractVector{LGIrrep{D}};
     # Find the Hilbert basis that respects the compatibility relations
     sb, _ = compatibility_basis(sgnum, D;
                         spinful=false, timereversal=timereversal, allpaths=allpaths)
-    # Find the indices of the Γ irreps in `BRS::BandRepSet` and `sb::SymBasis` and how they
+    # Find the indices of the Γ irreps in `brs::BandRepSet` and `sb::SymBasis` and how they
     # map to the corresponding irrep indices in `lgirs`.
     # TODO: note that the irrep-sorting in sb and lgirs is not always the same (e.g. in ±
     #       irreps), so we are not guaranteed that Γidxs is a simple range (e.g., it could 
     #       be [1,3,5,2,4,6]). We really ought to align the irreps sorting in `lgirreps`
-    #       versus `bandreps` (BRS) and `compatibility_basis` (sb).
+    #       versus `bandreps` (brs) and `compatibility_basis` (sb).
     Γidxs = get_Γidxs(lgirs, sb)
 
     return sb, Γidxs

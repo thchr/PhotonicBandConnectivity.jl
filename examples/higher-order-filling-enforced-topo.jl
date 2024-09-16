@@ -31,9 +31,9 @@ for sgnum in sgnums
     lgirs_Γ = lgirsd["Γ"]
 
     # prep-work to get Hilbert bases etc
-    BRS  = bandreps(sgnum, spinful=false, timereversal=timereversal)
-    B    = Crystalline.matrix(BRS) # Matrix with columns of EBRs.
-    isℤ₁ = classification(BRS) == "Z₁"
+    brs  = bandreps(sgnum, spinful=false, timereversal=timereversal)
+    B    = stack(brs) # matrix with columns of EBRs.
+    isℤ₁ = classification(brs) == "Z₁"
     if isℤ₁
         println(" ... skipping; trivial symmetry indicator group ℤ₁\n") 
         continue
@@ -42,7 +42,7 @@ for sgnum in sgnums
 
     F    = smith(B)   # Smith normal decomposition of B
     Nⁱʳʳ = size(B, 1) # number of irreps plus 1 (filling)
-    sb   = compatibility_basis(F, BRS;)
+    sb   = compatibility_basis(F, brs)
     Γidxs    = PBC.get_Γidxs(lgirs_Γ, sb)   
     notΓidxs = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
 

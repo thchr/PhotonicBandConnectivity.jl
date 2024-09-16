@@ -31,12 +31,12 @@ for (sgidx, sgnum) in enumerate(sgnums)
     print(" w/ ", length(n²ᵀ⁺¹ᴸs), " solution", length(n²ᵀ⁺¹ᴸs)≠1 ? "s" : "")
 
     # get EBRs
-    BRS = bandreps(sgnum, 3, timereversal=has_tr)
-    B   = matrix(BRS)
+    brs = bandreps(sgnum, 3, timereversal=has_tr)
+    B   = stack(brs)
     F   = Crystalline.smith(B)
 
     # print symmetry-identifiable class of space group
-    print("\t [", classification(BRS))
+    print("\t [", classification(brs))
     if show_has_fragile_phases 
         if !has_tr && sgnum ∈ (83,174,175,176)
             # the non-topological basis for tr-broken SGs 83, 174, 175, 176 is extremely
@@ -44,7 +44,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
             # general information about fragility here
             print(" | skipped fragility check (quagmire)]")
         else
-            nontopo_sb = nontopological_basis(F, BRS)
+            nontopo_sb = nontopological_basis(F, brs)
             trivial_idxs, fragile_idxs = split_fragiletrivial(nontopo_sb, B)
             !isempty(fragile_idxs) && print("+fragile")
         end

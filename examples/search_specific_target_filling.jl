@@ -1,5 +1,5 @@
 using Crystalline
-using Crystalline: matrix, smith, classification, prettyprint_symmetryvector
+using Crystalline: smith, classification, prettyprint_symmetryvector
 using PhotonicBandConnectivity
 using SymmetryBases
 using PrettyTables
@@ -57,13 +57,13 @@ for sgnum in sgnums
     lgirs_Γ = lgirsd["Γ"]
 
     # prep-work to get Hilbert bases etc
-    BRS  = bandreps(sgnum, spinful=false, timereversal=timereversal)
-    B    = matrix(BRS) # Matrix with columns of EBRs.
+    brs  = bandreps(sgnum, spinful=false, timereversal=timereversal)
+    B    = stack(brs)  # matrix with columns of EBRs.
     F    = smith(B)    # Smith normal decomposition of B
     Nⁱʳʳ = size(B, 1)  # number of irreps plus 1 (filling)
-    isℤ₁ = classification(BRS) == "Z₁"
+    isℤ₁ = classification(brs) == "Z₁"
       
-    sb       = compatibility_basis(F, BRS)
+    sb       = compatibility_basis(F, brs)
     Γidxs    = PBC.get_Γidxs(lgirs_Γ, sb)   
     notΓidxs = [idx for idx in 1:Nⁱʳʳ if idx ∉ Γidxs]
     io ≠ stdout && println("   ... found general Hilbert basis (", length(sb), " bases)")

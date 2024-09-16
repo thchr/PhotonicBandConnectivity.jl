@@ -1,7 +1,7 @@
 """
     calc_topology_singular(
             nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer}, 
-            BRS_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
+            brs_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
                                                                      -> ::TopologyKind
 
 Determines whether a transverse symmetry vector (``T``) - defined as the difference of a
@@ -12,7 +12,7 @@ symmetry vector `nᴸ` - is topologically trivial or nontrivial from a symmetry 
 - `nᵀ⁺ᴸ`: can be computed from an index vector `cⁱ` and a compatibility Hilbert basis
   `sb::SymBasis` by `sum_symbases(sb, cⁱ)`;
 - `nᴸ = sb[idx¹ᴸ]`: where `idx¹ᴸ` is the 1L-constraints pick in the `sb` basis;
-- `BRS_B_F`: a matrix representation of the elementary band representations (EBR) basis,
+- `brs_B_F`: a matrix representation of the elementary band representations (EBR) basis,
   [typically obtained from `bandreps(sgnum, kwarg...)`]. Must be of type `BandRepSet`,
   `AbstractMatrix{<:Integer}`, or `Smith` (in order of decreasing conversion-related
   overhead).
@@ -72,8 +72,8 @@ for f in (:calc_topology_singular, :indicators_singular)
     end
 
     @eval function $f(nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer},
-                      BRS::BandRepSet)
-        B = matrix(BRS)         # ::Matrix{Int}
+                      brs::BandRepSet)
+        B = stack(brs)         # ::Matrix{Int}
         return $f(nᵀ⁺ᴸ, nᴸ, B)
     end
 
@@ -82,7 +82,7 @@ for f in (:calc_topology_singular, :indicators_singular)
         @doc """
             $($f)(nᵀ::Vector{<:Integer}, nᴸ::Vector{<:Integer}, 
                   m²ᵀ::AbstractVector{<:Integer}, Γidxs::AbstractVector{<:Integer}, 
-                  BRS_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
+                  brs_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
                                                                            -> ::TopologyKind
         
         A convenience wrapper over
@@ -93,19 +93,19 @@ for f in (:calc_topology_singular, :indicators_singular)
         provided longitudinal symmetry `nᴸ` as well). This is frequently a more convenient
         access point.
         
-        As for its 3-argument parent method, the final argument `BRS_B_F` must provide the
+        As for its 3-argument parent method, the final argument `brs_B_F` must provide the
         EBR basis as a `BandRepSet`, an `AbstractMatrix{<:Integer}`, or a `Smith`
         decomposition.
         """
         function $f(nᵀ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer},
                     nΓ²ᵀ::AbstractVector{<:Integer}, Γidxs::AbstractVector{<:Integer},
-                    BRS_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
+                    brs_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
 
             nᵀ⁺ᴸ = copy(nᵀ)      # reconstruct nᵀ⁺ᴸ from nᵀ, nᴸ, and nΓ²ᵀ (note the tricky
             nᵀ⁺ᴸ[Γidxs] .+= nΓ²ᵀ # broadcasted indexing with Γidxs)
             nᵀ⁺ᴸ .+= nᴸ
 
-            return $f(nᵀ⁺ᴸ, nᴸ, BRS_B_F)
+            return $f(nᵀ⁺ᴸ, nᴸ, brs_B_F)
         end
     end
 
@@ -114,7 +114,7 @@ for f in (:calc_topology_singular, :indicators_singular)
     @eval function $f(nᵀ::AbstractVector{<:Integer},
                       sb::SymBasis,
                       lgirs::AbstractVector{LGIrrep{3}}, # Γ-irreps
-                      BRS_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
+                      brs_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
 
         sb.compatbasis || error(DomainError(sb, "`sb` must be a basis for {BS}"))
         sb.spinful     && error(DomainError(sb, "`sb` must be a spinless basis"))
@@ -128,6 +128,6 @@ for f in (:calc_topology_singular, :indicators_singular)
         idx¹ᴸ    = ntidxs¹ᴸ[pick¹ᴸ]
         nᴸ       = sb[idx¹ᴸ]
 
-        return $f(nᵀ, nᴸ, nΓ²ᵀ, Γidxs, BRS_B_F)
+        return $f(nᵀ, nᴸ, nΓ²ᵀ, Γidxs, brs_B_F)
     end
 end
