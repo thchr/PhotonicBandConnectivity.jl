@@ -1,8 +1,9 @@
 module PhotonicBandConnectivity
 
 using Crystalline
-using Crystalline: rotation
+using Crystalline: rotation, AbstractSymmetryVector
 using SymmetryBases
+using SymmetryBases: PyNormaliz
 using LinearAlgebra
 using DocStringExtensions
 
@@ -12,7 +13,10 @@ export minimal_expansion_of_zero_freq_bands,
     calc_topology_singular,
     indicators_singular,
     topology_from_2T1L_xor_1L, # deprecated; remove eventually
-    is_transverse_bandstruct
+    is_transverse_bandstruct,
+    transverse_symmetry_vectors,
+    transverse_vrep,
+    is_vrep
 
 # ---------------------------------------------------------------------------------------- #
 
@@ -23,6 +27,9 @@ include("constrained_expansions.jl")
 #include("src/legacy_constrained_expansions.jl")
 include("topology_as_2T1L_vs_1L_difference.jl")
 include("is_transverse_bandstruct.jl")
+
+include("transverse_symmetry_vector_solutions.jl")
+include("transverse_vrep.jl")
 
 # ---------------------------------------------------------------------------------------- #
 
