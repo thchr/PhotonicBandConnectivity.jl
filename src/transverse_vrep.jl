@@ -52,4 +52,4 @@ end
 Return whether or not an irrep is a "fake" virtual representation associated with the
 singularity of transverse modes at Γ and ω=0. See [`transverse_vrep`](@ref).
 """
-is_vrep(lgir::LGIrrep) = startswith(label(lgir), "(Γ")
+is_vrep(lgir::LGIrrep) = (irlab=label(lgir); startswith(irlab, '(') && contains(irlab, 'Γ'))

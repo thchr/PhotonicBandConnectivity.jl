@@ -32,6 +32,58 @@ include("transverse_symmetry_vector_solutions.jl")
 include("transverse_vrep.jl")
 
 # ---------------------------------------------------------------------------------------- #
+# TODO: Use the following to make the output of `minimal_expansion_of_zero_freq_bands` more
+#       structured, user-friendly, and sane
+
+#=
+function minimal_transverse_vectors(
+    sgnum::Integer, Dᵛ::Val{D}=Val(3);
+    timereversal::Bool=true
+    ) where D
+    
+    D ≠ 3 && error("only D = 3 is supported; D = 2 can be treated as regular")
+
+    lgirsd = lgirreps(sgnum, Dᵛ)
+    timereversal && realify!(lgirsd)
+    lgirsΓ = lgirsd["Γ"]
+    vrep = transverse_vrep(lgirsΓ)
+    push!(parent(lgirsΓ), vrep) # append fake vrep to `lgirsΓ`
+    vrep_lab = label(vrep)
+
+    cⁱs, _, sb, idxᴸ = minimal_expansion_of_zero_freq_bands(sgnum; timereversal)
+    Nⁱʳ = length(first(sb))
+    _ns = map(cⁱs) do cⁱ
+        _n = zeros(Int, Nⁱʳ)
+        sum_symbases!(_n, sb, cⁱ)
+        !isnothing(idxᴸ) && (_n .-= sb[idxᴸ])
+        _n
+    end
+    lastΓidx = something(findlast(irlab->klabel(irlab)=="Γ", sb.irlabs))     
+
+    # forcibly add the virtual rep to the symmetry vectors (we subtract double-count next)
+    foreach(_ns) do n
+        insert!(n, lastΓidx+1, 1)
+    end
+    irlabs = insert!(copy(sb.irlabs), lastΓidx+1, vrep_lab)
+    ns = SymmetryVector.(_ns, Ref(irlabs), Ref(lgirsd))
+
+    # at this point, we're double-counting the transverse virtual rep; remove it from 
+    # the regular irrep multiplicities
+    lgirsv_in_ns = first(ns).lgirsv
+    Γidx = something(findfirst(lgirs->klabel(first(lgirs))=="Γ", lgirsv_in_ns))
+    lgirsΓ_in_ns = first(ns).lgirsv[Γidx] # may have different sorting from `lgirsd[Γ]` (but vrep is still last)
+    cs = find_representation²ᵀ(@view lgirsΓ_in_ns[1:end-1])
+    for n in ns
+        mults = n.multsv[Γidx]
+        mults[1:end-1] .-= cs
+        @assert all(≥(0), mults)
+    end
+
+    return ns, lgirsΓ[end], lgirsd
+end
+=#
+
+# ---------------------------------------------------------------------------------------- #
 
 function minimal_expansion_of_zero_freq_bands(
             sgnum::Integer; 

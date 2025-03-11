@@ -1,8 +1,6 @@
 # Legacy implementations of `filling_symmetry_constrained_expansions`, now superceded by a 
 # recursive implementation 
 
-const PyNormaliz = SymmetryBases.PyNormaliz # TODO: Drop when/if Normaliz.jl matures
-
 """
     filling_symmetry_constrained_expansions_loop(νᵗ, ms, νsᴴ, sb, Γidxs)
 

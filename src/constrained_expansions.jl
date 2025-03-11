@@ -193,7 +193,7 @@ function filling_constrained_expansions(νsᴴ::AbstractVector{<:Integer}, νᵗ
     # Specify linear Diophantine equation via PyNormaliz's Cone constructor
     inhom_eqs = reshape([@view νsᴴ[nt_idxs]; -νᵗ], 1, length(nt_idxs)+1)
     #inhom_eqs = reshape([νsᴴ; -νᵗ], 1, length(νsᴴ)+1)
-    P = SymmetryBases.PyNormaliz.Cone(
+    P = PyNormaliz.Cone(
             inhom_equations = inhom_eqs, grading = ones(Int, 1, length(nt_idxs)))
     # Find non-negative integer solutions to the above integral polytope
     normaliz_sols = P.LatticePoints() # distinct solutions across rows
