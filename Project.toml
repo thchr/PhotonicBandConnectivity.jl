@@ -15,7 +15,10 @@ DocStringExtensions = "0.8, 0.9"
 Crystalline = "0.6.16"
 LLLplus = "1.4"
 SymmetryBases = "0.5"
-julia = "1.9"
+julia = "1.11"
+
+[sources]
+SymmetryBases = {url="https://github.com/thchr/SymmetryBases.jl"}
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
