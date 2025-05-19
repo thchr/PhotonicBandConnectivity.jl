@@ -33,7 +33,7 @@ for sgnum in sgnums
     # prep-work to get Hilbert bases etc
     brs  = bandreps(sgnum, spinful=false, timereversal=timereversal)
     B    = stack(brs) # matrix with columns of EBRs.
-    isℤ₁ = classification(brs) == "Z₁"
+    isℤ₁ = indicator_group_as_string(brs) == "Z₁"
     if isℤ₁
         println(" ... skipping; trivial symmetry indicator group ℤ₁\n") 
         continue

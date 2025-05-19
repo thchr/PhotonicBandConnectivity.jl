@@ -64,7 +64,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
     println(io, "## SG ", sgnum, "\n\nνᵀ = ", νᵀ, "\n")
 
     # print global properties of the space group wrt. topology
-        #classification(brs) ≠ "Z₁" && print(" [+NONTRIVIAL]")
+        #indicator_group_as_string(brs) ≠ "Z₁" && print(" [+NONTRIVIAL]")
         #!isempty(fragile_idxs)     && print(" [+FRAGILE]")
 
     # construct human-readable symmetry vectors, with the ω=0-connected Γ-irreps highlighted

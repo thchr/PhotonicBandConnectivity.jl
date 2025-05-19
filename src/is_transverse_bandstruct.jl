@@ -42,9 +42,9 @@ function is_transverse_bandstruct(
     # the constraints on longitudinal modes at Γ)
     n = nᵀ + nᴸ
 
-    # and finally, we test whether `n` is a band structure or not; if it is, then `n²ᵀ` is 
-    # a valid transverse band structure
-    return isbandstruct(n, F)
+    # and finally, we test whether `n` is a band structure (i.e., respects compatibility
+    # relations) or not; if it is, then `n²ᵀ` is a valid transverse band structure
+    return iscompatible(n, F)
 end
 
 function is_transverse_bandstruct(

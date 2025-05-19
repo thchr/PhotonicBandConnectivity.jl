@@ -36,7 +36,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
     F   = Crystalline.smith(B)
 
     # print symmetry-identifiable class of space group
-    print("\t [", classification(brs))
+    print("\t [", indicator_group_as_string(brs))
     if show_has_fragile_phases 
         if !has_tr && sgnum ∈ (83,174,175,176)
             # the non-topological basis for tr-broken SGs 83, 174, 175, 176 is extremely

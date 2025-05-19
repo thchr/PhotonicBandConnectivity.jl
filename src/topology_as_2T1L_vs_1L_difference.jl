@@ -51,8 +51,8 @@ function indicators_singular(
             nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer}, F::Smith)
 
     # get topological indices of L and T+L symmetry vectors
-    indicesᴸ, Λ   = indicators(nᴸ,   F)
-    indicesᵀ⁺ᴸ, _ = indicators(nᵀ⁺ᴸ, F)
+    indicesᴸ, Λ   = symmetry_indicators(nᴸ,   F)
+    indicesᵀ⁺ᴸ, _ = symmetry_indicators(nᵀ⁺ᴸ, F)
 
     # define 2T solution's topology from Λ-modded difference:
     indicesᵀ = mod.(indicesᵀ⁺ᴸ .- indicesᴸ, Λ)

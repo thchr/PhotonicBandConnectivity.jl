@@ -61,7 +61,7 @@ for sgnum in sgnums
     B    = stack(brs)  # matrix with columns of EBRs.
     F    = smith(B)    # Smith normal decomposition of B
     Nⁱʳʳ = size(B, 1)  # number of irreps plus 1 (filling)
-    isℤ₁ = classification(brs) == "Z₁"
+    isℤ₁ = indicator_group_as_string(brs) == "Z₁"
       
     sb       = compatibility_basis(F, brs)
     Γidxs    = PBC.get_Γidxs(lgirs_Γ, sb)   

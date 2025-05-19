@@ -29,7 +29,7 @@ for (sgidx, sgnum) in enumerate(sgnums)
     idx¹ᴸ = idx¹ᴸs[sgidx]
     
     # TODO: Treat the simpler `idx¹ᴸ !== nothing` case as well within this script?
-    if idx¹ᴸ !== nothing && classification(brss[sgidx]) ≠ "Z₁"
+    if idx¹ᴸ !== nothing && indicator_group_as_string(brss[sgidx]) ≠ "Z₁"
         sb, brs = sbs[sgidx], brss[sgidx]
         B  = stack(brs)
         F  = smith(B)
