@@ -4,11 +4,13 @@ Calculate minimum band connectivities below the fundamental gap in photonic crys
 
 ## Installation
 
-To install, you must first install [SymmetryBases.jl](https://github.com/thchr/SymmetryBases.jl)) which generally will require you to link PyNormaliz to `PyCall.jl`. Following this, PhotonicBandConnectivity.jl can be installed from Julia's `pkg>` prompt (entered by typing `]` at the Julia REPL):
+You can install PhotonicBandConnectivity.jl from Julia's `pkg>` prompt (entered by typing `]` at the Julia REPL):
 
 ```jl
-pkg> add https://github.com/thchr/PhotonicBandConnectivity.jl
+pkg> dev https://github.com/thchr/PhotonicBandConnectivity.jl
 ```
+
+By `dev`ing it (rather than `add`ing), we also automatically install [SymmetryBases.jl](https://github.com/thchr/SymmetryBases.jl), which is a required (and, like this package, unregistered) dependency of PhotonicBandConnectivity.jl.
 
 ## Example usage
 

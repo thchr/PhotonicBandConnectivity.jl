@@ -71,16 +71,17 @@ function transverse_symmetry_vectors(
     # special kind of cone-like polyhedron; seems it's sometimes just called a "translated
     # cone". The homogeneous, untranslated cone is then the "recession" or "tail" cone of
     # the associated polyhedron
-    C = PyNormaliz.Cone(inhom_inequalities = tC_matrix)
+    C = PyNormaliz.Cone(inhom_inequalities = eachrow(tC_matrix))
     C.Compute("HilbertBasis", "DualMode")
-    lattice_points = C.LatticePoints()
+    lattice_points_py = C.LatticePoints() # Python list of lists
+    lattice_points = pyconvert(Vector{Vector{Int}}, lattice_points_py)
 
-    if !all(isone, @view lattice_points[:,end])
+    if !all(v->isone(last(v)), lattice_points)
         error("unexpectedly obtained non-unity-graded lattice points: danger")
     end
     
     # go from the local "ℤ lattice" (into `S` columns) to the irrep-multiplicity lattice
-    _ns = Ref(S) .* eachrow(@view lattice_points[:,1:end-1])
+    _ns = [S * lattice_point[1:end-1] for lattice_point in lattice_points]
     ns = SymmetryVectors(_ns, irreplabels(brs), lgirsd)
     sort!(ns, by=occupation) # sort by occupation
 

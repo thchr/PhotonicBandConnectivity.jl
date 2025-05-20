@@ -4,6 +4,7 @@ using Crystalline
 using Crystalline: rotation, AbstractSymmetryVector
 using SymmetryBases
 using SymmetryBases: PyNormaliz
+using PythonCall
 using LinearAlgebra
 using DocStringExtensions
 

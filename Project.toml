@@ -9,11 +9,13 @@ DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 LLLplus = "142c1900-a1c3-58ae-a66d-b187f9ca6423"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SymmetryBases = "cb68ded9-7e8c-45d3-bc66-19b5867c0467"
+PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
 
 [compat]
 DocStringExtensions = "0.8, 0.9"
 Crystalline = "0.6.16"
 LLLplus = "1.4"
+PythonCall = "0.9.24"
 SymmetryBases = "0.5"
 julia = "1.11"
 

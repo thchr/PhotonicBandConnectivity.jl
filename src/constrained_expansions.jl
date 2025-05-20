@@ -191,17 +191,18 @@ function filling_constrained_expansions(νsᴴ::AbstractVector{<:Integer}, νᵗ
     # solution anyway and actually end up slowing down the calculation significantly
     nt_idxs = findall(≤(νᵗ), νsᴴ)
     # Specify linear Diophantine equation via PyNormaliz's Cone constructor
-    inhom_eqs = reshape([@view νsᴴ[nt_idxs]; -νᵗ], 1, length(nt_idxs)+1)
+    inhom_eqs = [vcat((@view νsᴴ[nt_idxs]), -νᵗ)]
     #inhom_eqs = reshape([νsᴴ; -νᵗ], 1, length(νsᴴ)+1)
     P = PyNormaliz.Cone(
-            inhom_equations = inhom_eqs, grading = ones(Int, 1, length(nt_idxs)))
+            inhom_equations = inhom_eqs, grading = [ones(Int, length(nt_idxs))])
     # Find non-negative integer solutions to the above integral polytope
-    normaliz_sols = P.LatticePoints() # distinct solutions across rows
+    normaliz_sols_py = P.LatticePoints() # distinct solutions across rows, Python list of lists
+    normaliz_sols = pyconvert(Vector{Vector{Int}}, normaliz_sols_py)
 
     # last column of `normaliz_sols` is a multiplier on ``-νᵗ``: should be 1, otherwise it 
     # corresponds to finding a solution that has a filling equal to a multiple of νᵗ. We 
     # filter out these solutions below.
-    cⁱs = [nt_idxs[coef2idxs(c′[1:end-1])] for c′ in eachrow(normaliz_sols) if isone(c′[end])]
+    cⁱs = [nt_idxs[coef2idxs(c′[1:end-1])] for c′ in normaliz_sols if isone(c′[end])]
     
     if verbose 
         println("   νᵗ = ", νᵗ, ": ", length(cⁱs), " νᵗ-constrained candidate solutions = ")
