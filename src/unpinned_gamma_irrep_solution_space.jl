@@ -48,30 +48,47 @@ breaking (i.e., complex or pseudoreal) irreps are not yet supported.
   lattice-reduction techniques (Seysen algorithm).
 """
 function physical_zero_frequency_gamma_irreps(
-            lgirs                  :: AbstractVector{LGIrrep{3}};
-            supergroup_constraints :: Bool = true,
-            force_fixed            :: Bool = true,
-            lattice_reduce         :: Bool = true
-            )
-    
+    lgirs                  :: AbstractVector{LGIrrep{3}};
+    supergroup_constraints :: Bool = true,
+    force_fixed            :: Bool = true,
+    lattice_reduce         :: Bool = true,
+)
+    timereversal = true
     if any(lgir->reality(lgir) ≠ REAL && !lgir.iscorep, lgirs)
-        # non-`realified` irreps; presently not handled
-        error("""input `lgirs` must be a set of `realified` or inherently real irreps;
-                 time-reversal breaking not yet supported""")                
+        # COMPLEX or PSEUDOREAL irreps in `lgirs`, but neither converted to corep form;
+        # i.e., we must have `timereversal = false`
+        timereversal = false
     end
     lg = group(first(lgirs))
     if klabel(lg) != "Γ" # only Γ-irreps are supported
-        error(lazy"input `lgirs`` are associated with the $(label(lg))-point: must be Γ")
+        error(lazy"input `lgirs` are associated with the $(label(lg))-point: must be Γ")
     end
-    pg = something(find_parent_pointgroup(lg))
-    pgirs = realify(pgirreps(label(pg))) # TODO: Generalize to non-`realified` irreps
+    pg, Iᵖ²ᵍ, _ = find_isomorphic_parent_pointgroup(lg)
+    pgirs = pgirreps(label(pg))
+    timereversal && (pgirs = realify(pgirs))
+    # TODO: `timereversal = false` is actually still not yet supported, since it will fail
+    #       later, when we assume the character table consists of real integers.
     pgops = operations(group(first(pgirs)))
+    if Iᵖ²ᵍ ≠ 1:length(lg)
+        # ops are permuted between `pg` & `lg`; re-sort `pg` & `pgirs` (we intentionally do
+        # not use `permute!` below, because the data in `pgirs` is unsafely loaded via JLD2
+        # and mutation causes problems)
+        pgops = pgops[Iᵖ²ᵍ]
+        pg′ = PointGroup{3}(pg.num, pg.label, pgops)
+        for (i, pgir) in enumerate(pgirs)
+            matrices′ = pgir.matrices[Iᵖ²ᵍ]
+            pgirs[i] = PGIrrep{3}(pgir.cdml, pg′, matrices′, pgir.reality, pgir.iscorep)
+        end
+    end
 
     local fixed, free, unpinned_idxmap
     if supergroup_constraints
         spg = find_pg_supergroup(pg)
-        spgirs = realify(pgirreps(label(spg)))
+        spgirs = pgirreps(label(spg), Val(3))
+        timereversal && (spgirs = realify(spgirs))
         spgops = operations(group(first(spgirs)))
+        # NB: ops-permutation between `spg`, `spgops` & `lg` is no problem; we re-sort below
+        
         # find unpinned operations & indexes into them in `ops`
         _, sis = pinned_and_unpinned_operation_indexes(spgops)
         # find fixed and free parts of possible symeig solutions
@@ -107,8 +124,7 @@ function physical_zero_frequency_gamma_irreps(
         x = x_force
     end
 
-    # now we have a representation of the symeigs that we like; convert it to a irrep 
-    # multiplicities
+    # now we have the symeigs lattice that we want; convert it to an irrep multipl. lattice
     ct = characters(pgirs)
     nfixed = ct\x
     nfree = ct\xfree
@@ -244,27 +260,32 @@ function unpinned_symeigs_basis(
     @assert freeᵤ == freeᵤ′[row_positions, :]
 
     if lattice_reduce
-        freeᵤ′′ = seysen(freeᵤ′)[1] # lattice reduce via Seysen algorithm
-        # now, to make printing "pretty" and reasonably consistent across cases, we do a few
-        # things to normalize the output a bit
-        if first(freeᵤ′′) == 0
-            _, idx = findmax(abs.(freeᵤ′′[1,:]))
-            newcols = collect(1:size(freeᵤ′′,2))
-            newcols[idx] = 1
-            newcols[1] = idx
-            @assert sort(newcols) == 1:size(freeᵤ′′,2)
-            freeᵤ′′ = freeᵤ′′[:,newcols]
-        end
-        if first(freeᵤ′′) < 0
-            freeᵤ′′ .*= -1
-        end
-
+        freeᵤ′′ = lattice_reduction(freeᵤ′)
         freeᵤ = freeᵤ′′[row_positions, :] # reconstruct "full" matrix
     end
 
     return fixedᵤ, freeᵤ, isᵤ
 end
 
+# lattice reduce `A` via Seysen's algorithm and canonicalize the output a bit (e.g., first
+# row has a nonzero, positive entry in first column))
+function lattice_reduction(A)
+    isempty(A) && return A
+    A′ = seysen(A)[1]
+    # to make printing "pretty" and reasonably consistent across cases, we do a few
+    # things to normalize `A′` a bit
+    if first(A′) == 0
+        _, idx = findmax(abs, @view A′[1,:])
+        newcols = collect(1:size(A′,2))
+        newcols[idx] = 1
+        newcols[1] = idx
+        A′ = A′[:,newcols]
+    end
+    if first(A′) < 0
+        A′ .*= -1
+    end
+    return A′
+end
 # ---------------------------------------------------------------------------------------- #
 
 pinned_symval²ᵀ(op) = round(Int, get_symval²ᵀ(op)) # always integer; enforce in type-domain
@@ -317,4 +338,102 @@ function generalized_inv(X::AbstractMatrix{<:Integer})
     Xᵍ = round.(Int, F.Tinv*Λg*F.Sinv*maxλ) # generalized inverse × maxλ; necessarily in ℤ
 
     return Xᵍ, maxλ
+end
+
+# ---------------------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------------------- #
+
+# `physical_zero_frequency_gamma_irreps` is the original solution to the problem - but it is
+# not well-suited for general-purpose use, since it wants to find the parent point group
+# which is both computationally costly & finicky (many corner cases for coordinate system
+# differences). But we actually can solve it much simpler by exploiting the insights the
+# results from `physical_zero_frequency_gamma_irreps` give, and in particular, the footnote
+# in our 2022 PRX paper on O(3) constraints. Working "backwards" from Eq. (S42), we can
+# determine a lattice basis for the "free part" of the symmetry eigenvalues, as constrained
+# by "integer-ness" of an O(3) irrep expansion. This basis is (see also my summarization in 
+# https://math.stackexchange.com/q/5074910/335146):
+#   x(-1) = 8∑ₗ cₗ(l+1)
+#   x(-3) = 2∑ₗ c₃ₗ - c₃ₗ₊₁
+#   x(-4) = 4∑ₗ c₄ₗ - c₄ₗ₊₂
+#   x(-6) = 6∑ₗ c₆ₗ + c₆ₗ₊₁ - c₆ₗ₊₃ - c₆ₗ₊₄
+# with cₗ ∈ ℤ, and l = 0,1,…,∞. Despite being spanned in an infinite-dimensional space by
+# cₗ, the intrinsic dimension of this lattice is 4. The first four "lattice vectors", vᵢ,
+# obtained by setting c = [1, 0, 0, 0, 0…], c = [0, 1, 0, 0, 0…], c = [0, 0, 1, 0, 0…], and 
+# c = [0, 0, 0, 1, 0…], are linearly independent and span the entire lattice. Thus, the
+function _xfree_basis_elements(l)
+    v = zeros(Int, 4)
+    v[1] = 8 * (l+1)                                       # x(-1)
+    v[2] = 2 * (iszero(mod(l,3)) - iszero(mod(l-1,3)))     # x(-3)
+    v[3] = 4 * (iszero(mod(l,4)) - iszero(mod(l-2,4)))     # x(-4)
+    v[4] = 6 * (iszero(mod(l,6)) + iszero(mod(l-1,6))      # x(-6)
+                - iszero(mod(l-3,6)) - iszero(mod(l-4,6)))
+    return v
+end
+const XFREE_BASIS = lattice_reduction(
+                        hcat(_xfree_basis_elements(0), _xfree_basis_elements(1),
+                             _xfree_basis_elements(2), _xfree_basis_elements(3)))
+
+"""
+    physical_zero_frequency_gamma_irreps_O3(
+        lgirs :: Collection{LGIrrep{3}}
+    )                                       --> Tuple{Vector{Int}, Matrix{Int}}
+
+Equivalent to `physical_zero_frequency_gamma_irreps`, but applies the "super" constraints
+from O(3) directly, not merely from the maximal crystallographic super point group.
+This implementation is more much more cost-effective, however, and is also more robust to
+setting variations. The returned lattice is always reduced via Seysen's algorithm.
+Similarly, this implementation always uses the equivalent of `force_fixed = true`.
+"""
+function physical_zero_frequency_gamma_irreps_O3(lgirs :: Collection{LGIrrep{3}})
+    lg = group(lgirs)
+    klabel(lg) == "Γ" || error(lazy"input `lgirs` must be Γ-irreps")
+
+    # identify the kinds of roto-inversions that are in the little group
+    rotoinv_orders = unique(Crystalline.rotation_order.(lg))
+    filter!(∈((-1, -3, -4, -6)), rotoinv_orders) # retain only (non-mirror) roto-inversions
+    sort!(rotoinv_orders; rev=true) # sort in (-1, -3, -4, -6) order)
+    
+    # determine a (reduced) basis for the "free part" of the symmetry eigenvalues, but
+    # restricting the lattice to just the symmetry eigenvalues that are actually in `lg`
+    include_rows = [r for (o, r) in zip((-1,-3,-4,-6), (1,2,3,4)) if o ∈ rotoinv_orders]
+    xfree_basis = @view XFREE_BASIS[include_rows, :]
+    F = smith(xfree_basis)
+    d = count(≠(0), F.SNF)
+    Λ = Diagonal(@view F.SNF[1:d])
+    xfree_basis_projected = F.S*Λ # projected basis for free part of symmetry eigenvalues
+    xfree_basis_reduced = lattice_reduction(xfree_basis_projected) # reduced & projected
+    @assert size(xfree_basis_reduced) == (length(rotoinv_orders), length(rotoinv_orders))
+
+    # express the symmetry eigenvalues as a lattice with fixed component `xfixed` and a
+    # lattice basis term `xfree`, i.e., as `x = xfixed + xfree * [l, p, q, …]`
+    xfixed = zeros(Int, length(lg))
+    xfree = zeros(Int, length(lg), length(rotoinv_orders))
+    for (row, op) in enumerate(lg)
+        xfixed[row] = pinned_symval²ᵀ(op)
+        length(rotoinv_orders) == 0 && continue
+        
+        # set `xfree[row, :]` according to the corresponding row of `xfree_basis_reduced`;
+        # we just need to determine what this row is:
+        row′ = findfirst(==(Crystalline.rotation_order(op)), rotoinv_orders)
+        isnothing(row′) && continue # not a roto-inversion operation; everything pinned
+        xfree[row, :] .= @view xfree_basis_reduced[row′, :]
+    end
+
+    # now we have the symmetry eigenvalues expressed as a lattice, and we just need to
+    # convert this to a lattice in the irrep multiplicities of `lgirs`
+    ct = characters(lgirs)
+    nfixed = ct\xfixed
+    nfixed_i = round.(Int, real.(nfixed))
+    if !isapprox(nfixed, nfixed_i, atol=1e-10)
+        error(lazy"expected real, integer solutions for `nfixed`, got $nfixed")
+    end
+    nfree = ct\xfree
+    nfree_i = round.(Int, real.(nfree))
+    if !isapprox(nfree, nfree_i, atol=1e-10)
+        error(lazy"expected real, integer solutions for `nfree`, got $nfree")
+    end
+
+    # we can return immediately; there's no permutations to consider, since we never went
+    # away from the original `lgirs` (i.e., we didn't involve another concrete point group)
+    return nfixed_i, nfree_i
 end
