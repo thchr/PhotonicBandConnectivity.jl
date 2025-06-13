@@ -309,8 +309,8 @@ end
 # ---------------------------------------------------------------------------------------- #
 
 include("unpinned_gamma_irrep_solution_space.jl")
-export physical_zero_frequency_gamma_irreps, prettyprint_irrep_solspace
-export physical_zero_frequency_gamma_irreps_03
+export physical_zero_frequency_gamma_irreps_O3
+export prettyprint_irrep_solspace
 
 # ---------------------------------------------------------------------------------------- #
 
