@@ -396,7 +396,7 @@ function physical_zero_frequency_gamma_irreps_O3(lgirs :: Collection{LGIrrep{3}}
     # determine a (reduced) basis for the "free part" of the symmetry eigenvalues, but
     # restricting the lattice to just the symmetry eigenvalues that are actually in `lg`
     include_rows = [r for (o, r) in zip((-1,-3,-4,-6), (1,2,3,4)) if o ∈ rotoinv_orders]
-    xfree_basis = @view XFREE_BASIS[include_rows, :]
+    xfree_basis = XFREE_BASIS[include_rows, :]
     F = smith(xfree_basis)
     d = count(≠(0), F.SNF)
     Λ = Diagonal(@view F.SNF[1:d])
