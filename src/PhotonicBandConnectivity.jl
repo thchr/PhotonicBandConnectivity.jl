@@ -75,7 +75,7 @@ function minimal_transverse_vectors(
     lgirsΓ_in_ns = first(ns).lgirsv[Γidx] # may have different sorting from `lgirsd[Γ]` (but vrep is still last)
     cs = find_representation²ᵀ(@view lgirsΓ_in_ns[1:end-1])
     for n in ns
-        mults = n.multsv[Γidx]
+        mults = multiplicities(n)[Γidx]
         mults[1:end-1] .-= cs
         @assert all(≥(0), mults)
     end

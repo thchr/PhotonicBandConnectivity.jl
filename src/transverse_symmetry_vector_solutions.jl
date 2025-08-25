@@ -83,7 +83,7 @@ function transverse_symmetry_vectors(
     # go from the local "ℤ lattice" (into `S` columns) to the irrep-multiplicity lattice
     _ns = [S * lattice_point[1:end-1] for lattice_point in lattice_points]
     ns = SymmetryVectors(_ns, irreplabels(brs), lgirsd)
-    sort!(ns, by=occupation) # sort by occupation
+    sort!(ns; by=occupation)
 
     if separate_vrep
         # insert virtual rep explicitly, as a separate irrep, and then subtract the
@@ -94,12 +94,15 @@ function transverse_symmetry_vectors(
         vrep = transverse_vrep(lgirsΓ′)
         n²ᵀΓ′ = find_representation²ᵀ(lgirsΓ′) # sorted as in `lgirsΓ′`, not `lgirsΓ`
         foreach(ns) do n
-            multsΓ = n.multsv[Γidx]
-            multsΓ .-= n²ᵀΓ′
+            multsv = multiplicities(n)
+            prev_multsΓ = multsv[Γidx]    # (a view into a JaggedVector{Int})
+            multsΓ = prev_multsΓ - n²ᵀΓ′  # (now a Vector{Int}, due to `-`)
             @assert all(≥(0), multsΓ)
-            push!(n.multsv[Γidx], 1) # append virtual rep, singly occupied
+            push!(multsΓ, 1) # append virtual rep, singly occupied
+            # overwrite Γ multiplicities with adjusted values (now 1 element longer also)
+            multsv[Γidx] = multsΓ
         end
-        push!(parent(lgirsv[Γidx]), vrep) # egal (===) for all `ns` ⇒ propagates to all `ns`
+        push!(parent(lgirsΓ′), vrep) # egal (===) for all `ns` ⇒ propagates to all `ns`
     end
     return ns
 end
