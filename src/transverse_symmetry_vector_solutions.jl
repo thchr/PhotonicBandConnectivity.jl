@@ -29,12 +29,18 @@ the principal solutions are a subset of the solutions obtained from
   constituent irrep multiplicites will be correspondingly subtracted from each
   `SymmetryVector`. In this case, all solutions will have strictly non-negative
   multiplicities.
+- `polarization` (only applicable in 2D, must be either `:TE` or `:TM`): specify whether
+  transverse electric (TE; H-field out-of-plane) or transverse magnetic (TM; E-field 
+  out-of-plane) modes are being considered in 2D cases. Omit or set to `nothing` in 3D. In
+  2D, this affects the symmetry eigenvalues at Γ and ω=0, and in turn affects the virtual
+  rep (which is not really virtual in 2D).
 """
 function transverse_symmetry_vectors(
     sgnum::Integer,
     Dᵛ::Val=Val(3);
-    timereversal::Bool = true, 
-    kws...)
+    timereversal::Bool = true,
+    kws...
+)
     brs = calc_bandreps(sgnum, Dᵛ; timereversal)
     lgirsd = lgirreps(sgnum, Dᵛ)
     timereversal && realify!(lgirsd)
@@ -48,8 +54,12 @@ end
 function transverse_symmetry_vectors(
     brs::Union{BandRepSet, Collection{<:AbstractSymmetryVector{D}}},
     lgirsd::AbstractDict{<:AbstractString, Collection{LGIrrep{D}}};
+    polarization::Union{Nothing, Symbol} = nothing,
     separate_vrep :: Bool = true
-    ) where D
+) where D
+
+    (D == 3 && !isnothing(polarization)) && error("in 3D, the `polarization` kwarg must be `nothing`")
+    (D == 2 && isnothing(polarization))  && error("in 2D, the `polarization` kwarg must be `:TE` or `:TM`")
 
     F = smith(stack(brs))
     dᵇˢ = count(!iszero, F.SNF)
@@ -57,7 +67,8 @@ function transverse_symmetry_vectors(
 
     # determine inhomogeneous constraints (nᵢ ≥ 0 for all kᵢ ≠ Γ and nᵢ ≥ n²ᵀΓᵢ for kᵢ = Γ)
     lgirsΓ = lgirsd["Γ"]
-    n²ᵀΓ = find_representation²ᵀ(lgirsΓ) # NB irrep-sorting may differ from `brs.irlabs`
+    n²ᵀΓ = find_representation²ᵀ(lgirsΓ, polarization) # NB: irrep-sorting may differ from
+                                                       #     `brs.irlabs`
     inhom = zeros(Int, length(first(brs)))
     for (lgirᵢ, nᵢ) in zip(lgirsΓ, n²ᵀΓ)
         idx = something(findfirst(==(label(lgirᵢ)), irreplabels(brs)))
@@ -91,8 +102,8 @@ function transverse_symmetry_vectors(
         lgirsv = irreps(first(ns))
         Γidx = something(findfirst(lgirs->klabel(first(lgirs))=="Γ", lgirsv))
         lgirsΓ′ = lgirsv[Γidx]
-        vrep = transverse_vrep(lgirsΓ′)
-        n²ᵀΓ′ = find_representation²ᵀ(lgirsΓ′) # sorted as in `lgirsΓ′`, not `lgirsΓ`
+        vrep = transverse_vrep(lgirsΓ′; polarization)
+        n²ᵀΓ′ = find_representation²ᵀ(lgirsΓ′, polarization) # sorted like lgirsΓ′, not lgirsΓ
         foreach(ns) do n
             multsv = multiplicities(n)
             prev_multsΓ = multsv[Γidx]    # (a view into a JaggedVector{Int})

@@ -1,20 +1,32 @@
 """
-    transverse_vrep(lgirs::AbstractVector{LGIrrep{D}}) where D --> LGIrrep{D}
+    transverse_vrep(
+        lgirs::AbstractVector{LGIrrep{D}};
+        polarization::Union{Nothing, Symbol} = nothing
+    ) where D --> LGIrrep{D}
 
 Create an synthetic representation of the virtual representation associated with the
 transverse modes at Γ and ω=0. This is a "fake" representation, which will not obey the
 representation algebra in general, but which will have the correct irrep dimensionality (2
-in 3D, 1 in 2D) and characters. 
+in 3D, 1 in 2D) and characters.
+In 2D, the `polarization` kwarg must be specified as either `:TE` or `:TM` to indicate which
+mode polarization is being represented.
 
 The irrep label will be a sum of the constituent irrep labels at Γ and will be distinguished
 from other irreps by being enclosed in parentheses.
 """
-function transverse_vrep(lgirs::AbstractVector{LGIrrep{D}}) where D
+function transverse_vrep(
+    lgirs::AbstractVector{LGIrrep{D}};
+    polarization::Union{Nothing, Symbol} = nothing
+) where D
     lg = group(first(lgirs))
-    χs = get_symvals²ᵀ(lg) # characters of vrep at ω=0, Γ
+    χs = get_symvals²ᵀ(lg, polarization) # characters of vrep at ω=0, Γ
     identity_idx = something(findfirst(isone, lg))
     _irdim = convert(Int, χs[identity_idx])
-    _irdim == 2 || error("unexpectedly obtained transverse irrep of dimension other than 2")
+    if D == 3
+        _irdim == 2 || error("unexpectedly obtained transverse rep of a dimension ≠ 2")
+    else
+        _irdim == 1 || error("unexpectedly obtained transverse rep of a dimension ≠ 1")
+    end
     diag_entries = χs ./ _irdim
     # create "fake" or "synthetic" representation matrices - which usually will not even
     # realize the algebra of the reps - but which have the correct characters (i.e. trace)
@@ -27,8 +39,8 @@ function transverse_vrep(lgirs::AbstractVector{LGIrrep{D}}) where D
     return LGIrrep{D}(irlab, lg, matrices, translations, REAL, false)
 end
 
-function transverse_vrep(lgirsd::AbstractDict{String, <:AbstractVector{<:LGIrrep}})
-    return transverse_vrep(lgirsd["Γ"])
+function transverse_vrep(lgirsd::AbstractDict{String, <:AbstractVector{<:LGIrrep}}; kws...)
+    return transverse_vrep(lgirsd["Γ"]; kws...)
 end
 
 function transverse_vrep_str(cs::AbstractVector{<:Integer}, lgirs::AbstractVector{<:LGIrrep})

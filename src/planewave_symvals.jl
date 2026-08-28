@@ -3,21 +3,32 @@
 # rotation order
 
 # two transverse and two longitudinal plane waves (2T+1L)
-function get_symval²ᵀ⁺¹ᴸ(op::SymOperation{3})
+function get_symval²ᵀ⁺¹ᴸ(
+    op::SymOperation{D},
+    polarization::Union{Nothing, Symbol} = nothing
+) where D
+    D == 3 || return get_symval²ᵀ(op, polarization) # no longitudinal modes for D ≤ 2
     W = rotation(op)
     rotval = Crystalline.rotation_order(W)
     n = abs(rotval)
     # This covers every case, including rotations, mirrors, rotoinversions, & inversion
     return sign(rotval) * (2cospi(2/n) + one(Float64))
 end
-get_symvals²ᵀ⁺¹ᴸ(ops::AbstractVector{SymOperation{3}}) = get_symval²ᵀ⁺¹ᴸ.(ops)
+function get_symvals²ᵀ⁺¹ᴸ(
+    ops::AbstractVector{<:SymOperation},
+    polarization::Union{Nothing, Symbol} = nothing
+)
+    return get_symval²ᵀ⁺¹ᴸ.(ops, polarization)
+end
 
 # single longitudinal plane wave (1L)
 get_symval¹ᴸ(::SymOperation{3}) = one(Float64)
+get_symval¹ᴸ(::SymOperation) = zero(Float64) # no longitudinal modes for D ≤ 2
 get_symvals¹ᴸ(ops::AbstractVector{SymOperation{3}}) = ones(Float64, length(ops))
+get_symvals¹ᴸ(ops::AbstractVector{<:SymOperation})  = zeros(Float64, length(ops))
 
 # two transverse plane waves (2T)
-function get_symval²ᵀ(op::SymOperation{3})
+function get_symval²ᵀ(op::SymOperation{3}, #=polarization=#::Nothing=nothing)
     W = rotation(op)
     rotval = Crystalline.rotation_order(W)   
     n = abs(rotval) # rotation order 
@@ -55,9 +66,31 @@ function get_symval²ᵀ(op::SymOperation{3})
         end
     end
 end
-get_symvals²ᵀ(ops::AbstractVector{SymOperation{3}}) = get_symval²ᵀ.(ops)
+
+function get_symval²ᵀ(op::SymOperation{2}, polarization::Symbol)
+    if polarization == :TM
+        return one(Float64)
+    elseif polarization == :TE
+        return det(rotation(op))
+    else
+        throw(DomainError(polarization, "polarization must be :TE or :TM in 2D"))
+    end
+end
+
+function get_symvals²ᵀ(
+    ops::AbstractVector{<:SymOperation},
+    polarization::Union{Nothing, Symbol}=nothing
+)
+    return get_symval²ᵀ.(ops, polarization)
+end
 
 # convenience accessors via space/little groups, ensuring primitive basis
-for f in (:get_symvals²ᵀ⁺¹ᴸ, :get_symvals¹ᴸ, :get_symvals²ᵀ)
-    @eval $f(sg::Union{LittleGroup{3}, SpaceGroup{3}}) = $f(operations(primitivize(sg)))
+for f in (:get_symvals²ᵀ⁺¹ᴸ, :get_symvals²ᵀ)
+    @eval function $f(
+        sg::Union{LittleGroup, SpaceGroup},
+        polarization::Union{Nothing, Symbol} = nothing
+    )
+        return $f(operations(primitivize(sg)), polarization)
+    end
 end
+get_symvals¹ᴸ(sg::Union{LittleGroup, SpaceGroup}) = get_symvals¹ᴸ(operations(primitivize(sg)))

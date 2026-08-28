@@ -36,18 +36,18 @@ end
 # irrep-expansions/representation at Γ for the transverse (2T), longitudinal (1L), and triad
 # (2T+1L) plane wave branches that touch ω=0 at Γ
 """
-    find_representation²ᵀ⁺¹ᴸ(lgirs::AbstractVector{LGIrrep{3}})
-    find_representation²ᵀ⁺¹ᴸ(sgnum::Integer; timereversal::Bool=true)
+    find_representation²ᵀ⁺¹ᴸ(lgirs::AbstractVector{LGIrrep{D}}, symval_optargs...)
+    find_representation²ᵀ⁺¹ᴸ(sgnum::Integer; timereversal::Bool=true, symval_optargs...)
 """
 function find_representation²ᵀ⁺¹ᴸ end
 """
-    find_representation¹ᴸ(lgirs::AbstractVector{LGIrrep{3}})
+    find_representation¹ᴸ(lgirs::AbstractVector{LGIrrep{D}})
     find_representation¹ᴸ(sgnum::Integer; timereversal::Bool=true)
 """
 function find_representation¹ᴸ    end
 """
-    find_representation²ᵀ(lgirs::AbstractVector{LGIrrep{3}})
-    find_representation²ᵀ(sgnum::Integer; timereversal::Bool=true)
+    find_representation²ᵀ(lgirs::AbstractVector{LGIrrep{D}}, symval_optargs...)
+    find_representation²ᵀ(sgnum::Integer; timereversal::Bool=true, symval_optargs...)
 """
 function find_representation²ᵀ    end
 
@@ -56,18 +56,26 @@ for postfix in ("²ᵀ⁺¹ᴸ", "¹ᴸ", "²ᵀ")
     symvals_fun = Symbol("get_symvals"*postfix)
 
     # "root" accessors via lgirs
-    @eval function $f(lgirs::AbstractVector{<:Crystalline.AbstractIrrep{3}})
+    @eval function $f(
+        lgirs::AbstractVector{<:Crystalline.AbstractIrrep{D}},
+        symval_optargs...
+    ) where D
         lg = group(first(lgirs))
-        symvals = $symvals_fun(lg)
+        symvals = $symvals_fun(lg, symval_optargs...)
 
         return find_representation(symvals, lgirs)
     end
 
     # convenience accessors via 
-    @eval function $f(sgnum::Integer; timereversal::Bool=true)
-        lgirs = lgirreps(sgnum, Val(3))["Γ"]
+    @eval function $f(
+        sgnum::Integer,
+        ::Val{D}=Val(3);
+        timereversal::Bool=true,
+        symval_optargs...
+    ) where D
+        lgirs = lgirreps(sgnum, Val(D))["Γ"]
         timereversal && (lgirs = realify(lgirs))
 
-        return $f(lgirs)
+        return $f(lgirs, symval_optargs...)
     end
 end
