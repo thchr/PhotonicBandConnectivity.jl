@@ -109,9 +109,15 @@ for sgnum in sgnums
 
         if filling_enforced
             println("      ⇒ Filling-enforced topology!")
-            pretty_table([nᵀs_str topos], ["nᵀ", "topology"]; # contents & header row
-                            alignment = :l, crop = :none, tf = tf_unicode, 
-                            vlines = :none, hlines = [:begin, 1, :end])
+            pretty_table([nᵀs_str topos];
+                column_labels = ["nᵀ", "topology"],
+                alignment = :l,
+                table_format = TextTableFormat(;
+                    horizontal_line_at_beginning = true,
+                    horizontal_line_after_column_labels = true,
+                    horizontal_line_after_data_rows = true,
+                    @text__no_vertical_lines)
+            )
         end
 
         # check if we are done

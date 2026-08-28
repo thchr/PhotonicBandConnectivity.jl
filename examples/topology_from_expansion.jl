@@ -98,13 +98,15 @@ for (sgidx, sgnum) in enumerate(sgnums)
 
     # print as table
     pretty_table(io,
-        [nᵀs_str topos],    # contents
-        ["nᵀ", "topology"]; # header row
+        [nᵀs_str topos];
+        column_labels = ["nᵀ", "topology"],
         #tf = tf_unicode,
-        #vlines = :none, hlines = [:begin, 1, :end],
+        table_format = TextTableFormat(;
+            horizontal_line_at_beginning = true,
+            horizontal_line_after_column_labels = true,
+            horizontal_line_after_data_rows = true,
+            @text__no_vertical_lines),
         alignment = :l,
-        crop = :none,
-        tf = tf_markdown,
     )
     println(io)
 end

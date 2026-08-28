@@ -8,3 +8,6 @@ PhotonicBandConnectivity = "d7bc101a-f969-4292-96d7-1ebdabfa903f"
 PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 SymmetryBases = "cb68ded9-7e8c-45d3-bc66-19b5867c0467"
+
+[compat]
+PrettyTables = "3"

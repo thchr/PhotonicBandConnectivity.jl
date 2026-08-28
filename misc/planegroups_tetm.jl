@@ -56,7 +56,14 @@ end
 
 ##
 timereversal = false
-table_opts = (tf = tf_unicode, alignment = :l, vlines = :none, hlines = [:begin, 1, :end])
+table_opts = (
+    alignment = :l, 
+    table_format = TextTableFormat(;
+        horizontal_line_at_beginning = true,
+        horizontal_line_after_column_labels = true,
+        horizontal_line_after_data_rows = true,
+        @text__no_vertical_lines)
+)
 
 for pgnum in 1:17
     local lgirs
@@ -104,8 +111,8 @@ for pgnum in 1:17
             "Pinned Γ-irrep:     ", irlabs[iridxᵀᴱ], "\n",
             "ω=0 connectivities: ", sort!(unique(μsᵀᴱ)))
     pretty_table(stdout,
-        [nsᵀᴱ_str μsᵀᴱ toposᵀᴱ],    # contents
-        ["nᵀᴱ", "μᵀᴱ", "topology"]; # header row
+        [nsᵀᴱ_str μsᵀᴱ toposᵀᴱ];    # contents
+        column_labels = ["nᵀᴱ", "μᵀᴱ", "topology"],
         table_opts...
     )
     println()
@@ -114,8 +121,8 @@ for pgnum in 1:17
             "Pinned Γ-irrep:     ", irlabs[iridxᵀᴹ], "\n",
             "ω=0 connectivities: ", sort!(unique(μsᵀᴹ )))
     pretty_table(stdout,
-        [nsᵀᴹ_str μsᵀᴹ toposᵀᴹ],    # contents
-        ["nᵀᴹ", "μᵀᴹ", "topology"]; # header row
+        [nsᵀᴹ_str μsᵀᴹ toposᵀᴹ];    # contents
+        column_labels = ["nᵀᴹ", "μᵀᴹ", "topology"],
         table_opts...
     )
 

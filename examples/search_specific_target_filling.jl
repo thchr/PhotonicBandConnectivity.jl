@@ -13,13 +13,17 @@ include("text_utils.jl"); using Main.TextUtils
 # TABLE CONFIG
 function table_config(type::String)
     if type == "latex"
-        return (backend = :latex, hlines= Int[], 
+        return (backend = :latex,
                 table_type = :longtable, 
                 longtable_footer = "\\emph{\\footnotesize\\ldots\\ continued on next page}")
     elseif type == "unicode"
-        return (crop = :none, tf = tf_unicode, vlines = :none, hlines = [:begin, 1, :end])
+        return (table_format = TextTableFormat(;
+                                horizontal_line_at_beginning = true,
+                                horizontal_line_after_column_labels = true,
+                                horizontal_line_after_data_rows = true,
+                                @text__no_vertical_lines),)
     elseif type == "markdown"
-        return (crop = :none, tf = tf_markdown)
+        return (backend = :markdown,)
     end
 end
 
@@ -140,10 +144,11 @@ for sgnum in sgnums
                 contents = nᵀs_str
                 header   = ["nᵀ"]
             end
-            pretty_table(io, contents, header; # contents & header row
-                             alignment = :l,
-                             table_config(outputtype)...
-                        )
+            pretty_table(io, contents; # contents & header row
+                column_labels = header,
+                alignment = :l,
+                table_config(outputtype)...
+            )
             println(io)
         end
         flush(io)
