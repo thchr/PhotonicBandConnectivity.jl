@@ -11,16 +11,16 @@ photonic bands connected to zero-frequency.
   symmetry vector, its Γ-projection should be empty).
 - `sb`: a compatibility Hilbert basis (see `compatibility_basis` in SymmetryBases).
 - `lgirs`: a vector of `LGIrrep`s at Γ (see `lgirreps` in Crystalline).
-- `F` or `brs`: the elementary band representations, provided either as a `BandRepSet` or as
-  the Smith decomposition of its matrix form. Can be omitted (incurring then a slight extra
-  cost).
+- `F` or `brs`: the elementary band representations, provided either as a
+  `Collection{<:BandRep}` or as the Smith decomposition of its matrix form. Can be omitted
+  (incurring then a slight extra cost).
 """
 function is_transverse_bandstruct(
-            nᵀ′::Vector{<:Integer},
-            sb::SymBasis,
-            lgirs::AbstractVector{LGIrrep{3}},
-            F::Smith # Smith decomposition of EBR matrix
-            )
+    nᵀ′::Vector{<:Integer},
+    sb::SymBasis{3},
+    lgirs::AbstractVector{LGIrrep{3}},
+    F::Smith # Smith decomposition of EBR matrix
+)
 
     sb.compatbasis || error(DomainError(sb, "`sb` must be a basis for {BS}"))
     sb.spinful     && error(DomainError(sb, "`sb` must be a spinless basis"))
@@ -48,13 +48,14 @@ function is_transverse_bandstruct(
 end
 
 function is_transverse_bandstruct(
-            nᵀ′::Vector{<:Integer},
-            sb::SymBasis,
-            lgirs::AbstractVector{LGIrrep{3}},
-            brs::BandRepSet = bandreps(sb.sgnum, 3; 
-                                       timereversal=sb.timeinvar, spinful=sb.spinful,
-                                       allpaths=sb.allpaths)
-            )
+  nᵀ′::Vector{<:Integer},
+  sb::SymBasis{3},
+  lgirs::AbstractVector{LGIrrep{3}},
+  brs::Collection{SpinlessBandRep{3}} = bandreps(sb.sgnum, 3; 
+                                                 timereversal=sb.timeinvar,
+                                                 spinful=Val(false),
+                                                 allpaths=sb.allpaths)
+)
 
     return is_transverse_bandstruct(nᵀ′, sb, lgirs, smith(stack(brs)))
 end

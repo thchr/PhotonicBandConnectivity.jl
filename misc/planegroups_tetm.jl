@@ -126,7 +126,6 @@ for pgnum in 1:17
         table_opts...
     )
 
-    println("\n")
-
+    pgnum ≠ 17 && println("\n")
 end
 

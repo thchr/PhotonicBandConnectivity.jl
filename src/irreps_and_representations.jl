@@ -7,15 +7,17 @@ as well as the associated indexes into the Γ point irreps in `sb`, computed fro
 Γ-point irreps `lgirs`.
 The space group number is inferred from the provided vector of `LGIrrep`s.
 """
-function compatibility_basis_and_Γidxs(lgirs::AbstractVector{LGIrrep{D}};
-                                       timereversal::Bool=false, 
-                                       allpaths::Bool=false) where D
+function compatibility_basis_and_Γidxs(
+    lgirs::AbstractVector{LGIrrep{D}};
+    timereversal::Bool=false, 
+    allpaths::Bool=false
+) where D
     sgnum = num(group(first(lgirs)))
     # Find the Hilbert basis that respects the compatibility relations
     sb, _ = compatibility_basis(sgnum, D;
                         spinful=false, timereversal=timereversal, allpaths=allpaths)
-    # Find the indices of the Γ irreps in `brs::BandRepSet` and `sb::SymBasis` and how they
-    # map to the corresponding irrep indices in `lgirs`.
+    # Find the indices of the Γ irreps in `sb::SymBasis` and how they map to the
+    # corresponding irrep indices in `lgirs`.
     # TODO: note that the irrep-sorting in sb and lgirs is not always the same (e.g. in ±
     #       irreps), so we are not guaranteed that Γidxs is a simple range (e.g., it could 
     #       be [1,3,5,2,4,6]). We really ought to align the irreps sorting in `lgirreps`
@@ -25,7 +27,10 @@ function compatibility_basis_and_Γidxs(lgirs::AbstractVector{LGIrrep{D}};
     return sb, Γidxs
 end
 
-function get_Γidxs(lgirs::AbstractVector{<:LGIrrep}, sb_or_brs::Union{BandRepSet, SymBasis})
+function get_Γidxs(
+    lgirs::AbstractVector{LGIrrep{D}},
+    sb_or_brs::Union{Collection{SpinlessBandRep{D}}, SymBasis{D}}
+) where D
     irlabs_sb_or_brs = irreplabels(sb_or_brs)
     irlabs_lgirs = label.(lgirs)
     Γidxs = map(irlab->findfirst(==(irlab), irlabs_sb_or_brs), irlabs_lgirs)

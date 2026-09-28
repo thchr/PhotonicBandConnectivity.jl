@@ -3,7 +3,7 @@ using Crystalline, PhotonicBandConnectivity
 # compute all symmetry vectors of photonic bands intrinsically connected to ω=0
 D = 3
 timereversal = true
-nsv = Vector{Vector{SymmetryVector{D}}}(undef, 230)
+nsv = Vector{Vector{SymmetryVector{D, LGIrrep{D}}}}(undef, 230)
 for sgnum in 1:230
     t₀ = time()
     print("#", sgnum)

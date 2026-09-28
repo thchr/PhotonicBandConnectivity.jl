@@ -2,7 +2,7 @@
     transverse_symmetry_vectors(sgnum, ::Val{D}[; timereversal::Bool = true, kws...])
     transverse_symmetry_vectors(sgnum, D[; timereversal::Bool = true, kws...])
     transverse_symmetry_vectors(brs, lgirsd[; separate_vrep::Bool = true])
-                                                            --> Vector{SymmetryVector{D}}
+                                            --> Vector{SymmetryVector{D, LGIrrep{D}}}
 
 Compute all "principal" solutions to the transverse photonic symmetry vector problem for
 bands connected to ω=0. A principal solution is necessarily connected and cannot be
@@ -41,8 +41,8 @@ function transverse_symmetry_vectors(
     timereversal::Bool = true,
     kws...
 )
-    brs = calc_bandreps(sgnum, Dᵛ; timereversal)
-    lgirsd = lgirreps(sgnum, Dᵛ)
+    brs = bandreps(sgnum, Dᵛ; timereversal, spinful=Val(false))
+    lgirsd = lgirreps(sgnum, Dᵛ; spinful=Val(false))
     timereversal && realify!(lgirsd)
     return transverse_symmetry_vectors(brs, lgirsd; kws...)
 end
@@ -52,7 +52,7 @@ function transverse_symmetry_vectors(sgnum::Integer, D::Integer; kws...)
 end
 
 function transverse_symmetry_vectors(
-    brs::Union{BandRepSet, Collection{<:AbstractSymmetryVector{D}}},
+    brs::Collection{<:AbstractSymmetryVector{D}},
     lgirsd::AbstractDict{<:AbstractString, Collection{LGIrrep{D}}};
     polarization::Union{Nothing, Symbol} = nothing,
     separate_vrep :: Bool = true

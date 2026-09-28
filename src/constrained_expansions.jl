@@ -2,7 +2,7 @@
     find_symmetry_constrained_bases(sb::SymBasis, ms::AbstractVector{<:Integer},
                                     Γidxs::AbstractVector{<:Integer})
 
-Return a vector of indices `idxs` into a Hilbert basis or BandRepSet `sb` (a basis whose
+Return a vector of indices `idxs` into a Hilbert basis or set of BRs `sb` (a basis whose
 elements are non-negative symmetry vectors), such that `sb[idx]` for each `idx ∈ idxs` has
 at least one positive element in overlap with a set of irrep multiplicities `ms`.
 
@@ -11,10 +11,10 @@ specified by `Γidxs`, such that the labels of `ms` equal the labels of `sb[i][�
 each `i`.
 """
 function find_symmetry_constrained_bases(
-        sb::Union{SymBasis, BandRepSet},
-        ms::AbstractVector{<:Integer},
-        Γidxs::AbstractVector{<:Integer}
-    )
+    sb::Union{SymBasis, Collection{<:SpinlessBandRep}},
+    ms::AbstractVector{<:Integer},
+    Γidxs::AbstractVector{<:Integer}
+)
     ntidxsᴴ = Int[]
     for (idx, nᴴ) in enumerate(sb)
         if has_mutual_positive_elements((@view nᴴ[Γidxs]), ms)
@@ -37,7 +37,7 @@ end
         νᵗ::Integer,
         ms::AbstractVector{<:Integer},
         νsᴴ,
-        sb::Union{SymBasis, BandRepSet},
+        sb::Union{SymBasis, Collection{<:SpinlessBandRep}},
         Γidxs;
         ntidxs = eachindex(sb),
         maxdepth = div(νᵗ, minimum(νsᴴ), RoundDown)
@@ -74,15 +74,14 @@ despite being less capable or much slower, respectively, in the belief that they
 provide a simpler illustration of the conceptual approach.
 """
 function filling_symmetry_constrained_expansions(
-        νᵗ::Integer,
-        ms::AbstractVector{<:Integer},
-        νsᴴ,
-        sb::Union{SymBasis, BandRepSet},
-        Γidxs;
-        ntidxs=eachindex(sb),
-        maxdepth::Integer=div(νᵗ, minimum(νsᴴ), RoundDown)
-    )
-
+    νᵗ::Integer,
+    ms::AbstractVector{<:Integer},
+    νsᴴ,
+    sb::Union{SymBasis, Collection{<:SpinlessBandRep}},
+    Γidxs;
+    ntidxs=eachindex(sb),
+    maxdepth::Integer=div(νᵗ, minimum(νsᴴ), RoundDown)
+)
     νᵗ > 0 || throw(DomainError(νᵗ, "must be positive"))
 
     cⁱs = Vector{Int}[] # solution vector storage
@@ -90,8 +89,11 @@ function filling_symmetry_constrained_expansions(
     _filling_symmetry_constrained_expansions!(cⁱs, ms′, (), νᵗ, ms, νsᴴ, sb, Γidxs, 
                                               1, length(ntidxs), 1, maxdepth, ntidxs)
 end
-function _filling_symmetry_constrained_expansions!(cⁱs, ms′, ijks, νᵗ, ms, νsᴴ, 
-                sb::Union{SymBasis, BandRepSet}, Γidxs, startidx, stopidx, depth, maxdepth, ntidxs)
+function _filling_symmetry_constrained_expansions!(
+    cⁱs, ms′, ijks, νᵗ, ms, νsᴴ, 
+    sb::Union{SymBasis, Collection{<:SpinlessBandRep}}, 
+    Γidxs, startidx, stopidx, depth, maxdepth, ntidxs
+)
     depth > maxdepth && return cⁱs
     for idxᵢ in startidx:stopidx
         i = ntidxs[idxᵢ]
@@ -128,8 +130,8 @@ end
 
 # update Γ-constraints, assigning to ms′
 @inline function _update_symmetry_constraints!(
-        ms′, ijks::NTuple{N,Int}, ms, sb::Union{SymBasis, BandRepSet}, Γidxs
-    ) where N
+    ms′, ijks::NTuple{N,Int}, ms, sb::Union{SymBasis, Collection{<:SpinlessBandRep}}, Γidxs
+) where N
 
     if N == 1
         i, = ijks

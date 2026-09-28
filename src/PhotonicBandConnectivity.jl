@@ -2,6 +2,7 @@ module PhotonicBandConnectivity
 
 using Crystalline
 using Crystalline: rotation, AbstractSymmetryVector
+using Crystalline: bandreps, Collection, BandRep, LGIrrep, SiteIrrep
 using SymmetryBases
 using SymmetryBases: PyNormaliz
 using PythonCall
@@ -18,6 +19,11 @@ export minimal_expansion_of_zero_freq_bands,
     transverse_symmetry_vectors,
     transverse_vrep,
     is_vrep
+
+# ---------------------------------------------------------------------------------------- #
+
+# alias for a spinless band representation; spinful variants are irrelevant for photons
+const SpinlessBandRep{D} = BandRep{D, LGIrrep{D}, SiteIrrep{D}}
 
 # ---------------------------------------------------------------------------------------- #
 

@@ -1,7 +1,7 @@
 """
     calc_topology_singular(
             nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer}, 
-            brs_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
+            brs_B_F::Union{Collection{<:BandRep}, AbstractMatrix{<:Integer}, Smith})
                                                                      -> ::TopologyKind
 
 Determines whether a transverse symmetry vector (``T``) - defined as the difference of a
@@ -13,9 +13,9 @@ symmetry vector `nᴸ` - is topologically trivial or nontrivial from a symmetry 
   `sb::SymBasis` by `sum_symbases(sb, cⁱ)`;
 - `nᴸ = sb[idx¹ᴸ]`: where `idx¹ᴸ` is the 1L-constraints pick in the `sb` basis;
 - `brs_B_F`: a matrix representation of the elementary band representations (EBR) basis,
-  [typically obtained from `bandreps(sgnum, kwarg...)`]. Must be of type `BandRepSet`,
-  `AbstractMatrix{<:Integer}`, or `Smith` (in order of decreasing conversion-related
-  overhead).
+  [typically obtained from `bandreps(sgnum, kwarg...)`]. Must be of type
+  `Collection{<:BandRep}`, `AbstractMatrix{<:Integer}`, or `Smith` (in order of decreasing
+  conversion-related overhead).
 
 **Output:**
 - a member of the enum `SymBases.TopologyKind`, either `TRIVIAL = 0` or `NONTRIVIAL = 1`.
@@ -72,7 +72,7 @@ for f in (:calc_topology_singular, :indicators_singular)
     end
 
     @eval function $f(nᵀ⁺ᴸ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer},
-                      brs::BandRepSet)
+                      brs::Collection{<:SpinlessBandRep})
         B = stack(brs)         # ::Matrix{Int}
         return $f(nᵀ⁺ᴸ, nᴸ, B)
     end
@@ -80,10 +80,13 @@ for f in (:calc_topology_singular, :indicators_singular)
     # Fancier, more convenient wrappers
     @eval begin 
         @doc """
-            $($f)(nᵀ::Vector{<:Integer}, nᴸ::Vector{<:Integer}, 
-                  m²ᵀ::AbstractVector{<:Integer}, Γidxs::AbstractVector{<:Integer}, 
-                  brs_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
-                                                                           -> ::TopologyKind
+            $($f)(
+                nᵀ::Vector{<:Integer},
+                nᴸ::Vector{<:Integer}, 
+                m²ᵀ::AbstractVector{<:Integer},
+                Γidxs::AbstractVector{<:Integer}, 
+                brs_B_F::Union{Collection{<:BandRep}, AbstractMatrix{<:Integer}, Smith}
+            ) -> ::TopologyKind
         
         A convenience wrapper over
         [`$($f)(::AbstractVector{<:Integer}, ::AbstractVector{<:Integer}, ::Smith)`](@ref),
@@ -94,12 +97,14 @@ for f in (:calc_topology_singular, :indicators_singular)
         access point.
         
         As for its 3-argument parent method, the final argument `brs_B_F` must provide the
-        EBR basis as a `BandRepSet`, an `AbstractMatrix{<:Integer}`, or a `Smith`
+        EBR basis as a `Collection{<:BandRep}`, an `AbstractMatrix{<:Integer}`, or a `Smith`
         decomposition.
         """
-        function $f(nᵀ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer},
-                    nΓ²ᵀ::AbstractVector{<:Integer}, Γidxs::AbstractVector{<:Integer},
-                    brs_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
+        function $f(
+            nᵀ::AbstractVector{<:Integer}, nᴸ::AbstractVector{<:Integer},
+            nΓ²ᵀ::AbstractVector{<:Integer}, Γidxs::AbstractVector{<:Integer},
+            brs_B_F::Union{Collection{<:SpinlessBandRep}, AbstractMatrix{<:Integer}, Smith}
+        )
 
             nᵀ⁺ᴸ = copy(nᵀ)      # reconstruct nᵀ⁺ᴸ from nᵀ, nᴸ, and nΓ²ᵀ (note the tricky
             nᵀ⁺ᴸ[Γidxs] .+= nΓ²ᵀ # broadcasted indexing with Γidxs)
@@ -111,10 +116,12 @@ for f in (:calc_topology_singular, :indicators_singular)
 
     # TODO: doc-string (convenience accessor that doesn't require us to actually provide 
     #       `nᴸ` or `ms²ᵀ`)
-    @eval function $f(nᵀ::AbstractVector{<:Integer},
-                      sb::SymBasis,
-                      lgirs::AbstractVector{LGIrrep{3}}, # Γ-irreps
-                      brs_B_F::Union{BandRepSet, AbstractMatrix{<:Integer}, Smith})
+    @eval function $f(
+        nᵀ::AbstractVector{<:Integer},
+        sb::SymBasis{3},
+        lgirs::AbstractVector{LGIrrep{3}}, # Γ-irreps
+        brs_B_F::Union{Collection{SpinlessBandRep{3}}, AbstractMatrix{<:Integer}, Smith}
+    )
 
         sb.compatbasis || error(DomainError(sb, "`sb` must be a basis for {BS}"))
         sb.spinful     && error(DomainError(sb, "`sb` must be a spinless basis"))
